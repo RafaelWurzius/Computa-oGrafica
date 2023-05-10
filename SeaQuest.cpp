@@ -10,12 +10,23 @@
 #define janela_altura 400
 #define janela_largura 600
 
+// variaveis que armazenam a translacao no quadro
+float tx = 0.0;
+float ty = 0.0;
+// incremento em variaveis.
+float xStep = 4;
+float yStep = 4;
+
 float transX = 0;
 float transY = 0;
 bool direita = false;
+bool fogo = false;
+
 void display(void);
 void tela(GLsizei w, GLsizei h);
 void keyboard(unsigned char tecla, int x, int y);
+void animaTorpedoD(int valor);
+void animaTorpedoE(int valor);
 
 int main(int argc, char** argv)
 {
@@ -32,9 +43,26 @@ int main(int argc, char** argv)
 	glutKeyboardFunc(&keyboard);  // chama teclado
 	glutReshapeFunc(tela);  // configura a tela
 	glutDisplayFunc(display);
+	
 	glutMainLoop(); // redesenhar
 
 	return(0);
+}
+
+void animaTorpedoD(int valor) {
+	
+	tx += xStep;
+
+	glutPostRedisplay();
+	glutTimerFunc(150, animaTorpedoD, 1);
+}
+
+void animaTorpedoE(int valor) {
+
+	tx -= xStep;
+	
+	glutPostRedisplay();
+	glutTimerFunc(150, animaTorpedoE, 1);
 }
 
 
@@ -66,6 +94,21 @@ void keyboard(unsigned char tecla, int x, int y)
 		transY = transY - 5;
 		printf("\n o valor de translacao e %.2f\n", transY);
 	}
+	if (tecla == ' ') {
+		fogo = true;
+		tx = transX;
+		ty = transY;
+		if (direita) {
+			glutTimerFunc(150, animaTorpedoD, 1);
+			exit;
+		}
+		else {
+			glutTimerFunc(150, animaTorpedoE, 1);
+			exit;
+		}
+		printf("FOGO!");
+
+	}
 
 
 	glutPostRedisplay();
@@ -77,6 +120,25 @@ void keyboard(unsigned char tecla, int x, int y)
 
 void desenhar()
 {
+	//torpedo
+	//torpedo
+	if (fogo) {
+
+		glPushMatrix();
+
+			glTranslatef(50, 0, 0);
+			glTranslatef(tx, ty, 0);
+			glBegin(GL_QUADS);
+				glColor3f(1.0, 0.0, 0.0);  // cor
+				glVertex2f(-10, 10);
+				glVertex2f(40, 10);
+				glVertex2f(40, -10);
+				glVertex2f(-10, -10);
+			glEnd();
+		glPopMatrix();
+
+	}
+
 	GLfloat circ_pnt = 300;
 	GLfloat ang, raioX = 10.0f, raioY = 10.0f;
 	glTranslatef(0, 0, 0);
@@ -109,15 +171,15 @@ void desenhar()
 
 		//ponta
 		glPushMatrix();
-		glTranslatef(43, 0, 0);
-		glBegin(GL_POLYGON);
-		for (int i = 0; i < circ_pnt; i++)
-		{
-			ang = (2 * PI * i) / circ_pnt;
-			glVertex2f(cos(ang) * raioX, sin(ang) * raioY);
-			//printf("%f %f\n", cos(ang) * raioX, sin(ang) * raioY);
-		}
-		glEnd();
+			glTranslatef(43, 0, 0);
+			glBegin(GL_POLYGON);
+			for (int i = 0; i < circ_pnt; i++)
+			{
+				ang = (2 * PI * i) / circ_pnt;
+				glVertex2f(cos(ang) * raioX, sin(ang) * raioY);
+				//printf("%f %f\n", cos(ang) * raioX, sin(ang) * raioY);
+			}
+			glEnd();
 		glPopMatrix();
 
 		//quadrado em cima
@@ -286,6 +348,7 @@ void desenhar()
 
 		glPopMatrix();
 	}
+
 }
 
 void display()
