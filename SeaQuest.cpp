@@ -14,13 +14,15 @@
 float tx = 0.0;
 float ty = 0.0;
 // incremento em variaveis.
-float xStep = 4;
-float yStep = 4;
+float xStep = 10;
+float yStep = 10;
 
 float transX = 0;
 float transY = 0;
 bool direita = false;
 bool fogo = false;
+bool continuarD = true;
+bool continuarE = true;
 
 void display(void);
 void tela(GLsizei w, GLsizei h);
@@ -51,27 +53,28 @@ int main(int argc, char** argv)
 
 void animaTorpedoD(int valor) {
 	
-	tx += xStep;
+	if (continuarD) {
+		tx += xStep;
 
-	glutPostRedisplay();
-	glutTimerFunc(150, animaTorpedoD, 1);
+		glutPostRedisplay();
+		glutTimerFunc(50, animaTorpedoD, 1);
+	}
+
 }
 
 void animaTorpedoE(int valor) {
 
-	tx -= xStep;
+	if (continuarE) {
+		tx -= xStep;
 	
-	glutPostRedisplay();
-	glutTimerFunc(150, animaTorpedoE, 1);
+		glutPostRedisplay();
+		glutTimerFunc(50, animaTorpedoE, 1);
+	}
 }
 
 
 void keyboard(unsigned char tecla, int x, int y)
 {
-	printf("\ntecla %c\n", tecla);
-	printf("\n\nDigite 1 para esquerda: ");
-	printf("\ntecla %c\n", tecla);
-	printf("\no mouse estava em %d x %d\n", x, y);
 	if (tecla == 'a')
 	{
 		direita = false;
@@ -96,14 +99,24 @@ void keyboard(unsigned char tecla, int x, int y)
 	}
 	if (tecla == ' ') {
 		fogo = true;
-		tx = transX;
-		ty = transY;
+	
+		glutTimerFunc(50, animaTorpedoD, 1);
+		glutTimerFunc(50, animaTorpedoE, 1);
+
+
 		if (direita) {
-			glutTimerFunc(150, animaTorpedoD, 1);
+			tx = transX + 110;
+			ty = transY;
+
+			continuarE = false;
+			continuarD = true;
 			exit;
 		}
 		else {
-			glutTimerFunc(150, animaTorpedoE, 1);
+			tx = transX - 10;
+			ty = transY;
+			continuarD = false;
+			continuarE = true;
 			exit;
 		}
 		printf("FOGO!");
@@ -121,12 +134,11 @@ void keyboard(unsigned char tecla, int x, int y)
 void desenhar()
 {
 	//torpedo
-	//torpedo
 	if (fogo) {
 
 		glPushMatrix();
 
-			glTranslatef(50, 0, 0);
+			//glTranslatef(50, 0, 0);
 			glTranslatef(tx, ty, 0);
 			glBegin(GL_QUADS);
 				glColor3f(1.0, 0.0, 0.0);  // cor
@@ -348,6 +360,95 @@ void desenhar()
 
 		glPopMatrix();
 	}
+
+	//TUBARAIO
+	glPushMatrix();
+	glTranslatef(-40, 0, 0);
+		glPushMatrix();
+			glColor3f(0.0, 1.0, 0.0);  // cor
+			glTranslatef(-13, 0, 0);
+			raioX = 40.0f, raioY = 10.0f;
+			glBegin(GL_POLYGON);
+			for (int i = 0; i < circ_pnt; i++)
+			{
+				ang = (2 * PI * i) / circ_pnt;
+				glVertex2f(cos(ang) * raioX, sin(ang) * raioY);
+			}
+			glEnd();
+		glPopMatrix();
+		//barbatana emcima
+		glPushMatrix();
+
+		glTranslatef(0, 10, 0);
+			glColor3f(0.0, 1.0, 0.0);  // cor
+			glBegin(GL_TRIANGLES);
+				glVertex2f(-5, 15);
+				glVertex2f(-10, -10);
+				glVertex2f(10, -10);
+			glEnd();
+
+		glPopMatrix();
+
+		//boca
+		glPushMatrix();
+			glTranslatef(-2, 6, 0);
+			glColor3f(0.0, 1.0, 0.0);  // cor
+			glBegin(GL_TRIANGLES);
+				glVertex2f(-6, -25);
+				glVertex2f(-8, -10);
+				glVertex2f(8, -10);
+			glEnd();
+
+		glPopMatrix();
+
+		//rabo1
+		glPushMatrix();
+			glTranslatef(-45, 5, 0);
+			glColor3f(0.0, 1.0, 0.0);  // cor
+			glBegin(GL_TRIANGLES);
+				glVertex2f(-15, 20);
+				glVertex2f(-10, -8);
+				glVertex2f(10, -8);
+			glEnd();
+
+		glPopMatrix();
+
+		//rabo2
+		glPushMatrix();
+			glTranslatef(-45, 5, 0);
+			glColor3f(0.0, 1.0, 0.0);  // cor
+			glBegin(GL_TRIANGLES);
+				glVertex2f(-10, -15);
+				glVertex2f(-10, -8);
+				glVertex2f(10, -8);
+			glEnd();
+
+		glPopMatrix();
+
+		//boca
+		glPushMatrix();
+			glTranslatef(15, -7, 0);
+			glColor3f(0.0, 1.0, 0.0);  // cor
+			glBegin(GL_TRIANGLES);
+				glVertex2f(-10, 3);
+				glVertex2f(12, -3);
+				glVertex2f(5, 5);
+			glEnd();
+
+		glPopMatrix();
+
+		//boca
+		glPushMatrix();
+			glTranslatef(25, -2, 0);
+			glColor3f(0.0, 0.0, 0.0);  // cor
+			glPointSize(3.0f);
+			glBegin(GL_POINTS);
+
+				glVertex2f(-10, 3);
+			glEnd();
+
+		glPopMatrix();
+	glPopMatrix();
 
 }
 
