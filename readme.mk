@@ -6,3 +6,4 @@ Esfera e um cubo(criar um cubo(de inox, q refelete bem) do lado da esfera, criar
 Escolher mais 3:
   Animacao
   Barquinho
+  Piramede-Cubo_3D ou 
