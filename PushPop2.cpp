@@ -68,7 +68,7 @@ void keyboard(unsigned char tecla, int x, int y)
 		rotacaoT = rotacaoT - 2;
 		printf("\n o valor de escala e %.2f\n", rotacaoT);
 	}
-	
+
 	if (tecla == '5')
 	{
 		rotacaoR = rotacaoR + 2;
@@ -94,11 +94,14 @@ void keyboard(unsigned char tecla, int x, int y)
 		zoomR = zoomR + 0.1;
 		printf("\n o valor do zoom e %.2f\n", zoomR);
 	}
-	if (tecla == '0') {
-		zoomR = 1;
-		zoomQ = 1;
-		zoomT = 1;
-	
+	if (tecla == 'z') {
+		zoomR = zoomR - 0.1;
+	}
+	if (tecla == 'x') {
+		zoomQ = zoomQ - 0.1;
+	}
+	if (tecla == 'c') {
+		zoomT = zoomT - 0.1;
 	}
 	if (tecla == 'a') {
 		transX = transX - 10;
@@ -125,17 +128,17 @@ void desenhar()
 	glScalef(zoomQ, zoomQ, 0);
 
 	//salva matriz
-	
+
 
 	// rotacao (angulo, eixo x, eixo y, eixo z);
 	glRotated(rotacaoQ, 0, 0, 1);
 
 	glBegin(GL_QUADS);
-		glColor3f(1.0, 1.0, 0.0);  // cor
-		glVertex2f(-200, 50);
-		glVertex2f(-100, 50);
-		glVertex2f(-100, 150);
-		glVertex2f(-200, 150);
+	glColor3f(1.0, 1.0, 0.0);  // cor
+	glVertex2f(-200, 50);
+	glVertex2f(-100, 50);
+	glVertex2f(-100, 150);
+	glVertex2f(-200, 150);
 	glEnd();
 
 
@@ -143,7 +146,7 @@ void desenhar()
 
 
 
-	
+
 
 	glPushMatrix();
 	glRotated(rotacaoT, 0, 0, 1);
@@ -158,7 +161,7 @@ void desenhar()
 
 	glEnd();
 
-	
+
 
 	glPopMatrix();
 
@@ -179,7 +182,7 @@ void desenhar()
 
 
 	//glScalef(1, 1, 0);
-	
+
 }
 
 void display()
