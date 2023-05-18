@@ -7,8 +7,8 @@
 #include <math.h> 
 #define PI 3.1415926535898  
 
-#define janela_altura 400
-#define janela_largura 600
+#define janela_altura 800
+#define janela_largura 800
 
 // variaveis que armazenam a translacao no quadro
 float tx = 0.0;
@@ -19,6 +19,7 @@ float yStep = 10;
 
 float transX = 0;
 float transY = 0;
+
 bool direita = false;
 bool fogo = false;
 bool continuarD = true;
@@ -45,14 +46,14 @@ int main(int argc, char** argv)
 	glutKeyboardFunc(&keyboard);  // chama teclado
 	glutReshapeFunc(tela);  // configura a tela
 	glutDisplayFunc(display);
-	
+
 	glutMainLoop(); // redesenhar
 
 	return(0);
 }
 
 void animaTorpedoD(int valor) {
-	
+
 	if (continuarD) {
 		tx += xStep;
 
@@ -66,7 +67,7 @@ void animaTorpedoE(int valor) {
 
 	if (continuarE) {
 		tx -= xStep;
-	
+
 		glutPostRedisplay();
 		glutTimerFunc(50, animaTorpedoE, 1);
 	}
@@ -99,7 +100,7 @@ void keyboard(unsigned char tecla, int x, int y)
 	}
 	if (tecla == ' ') {
 		fogo = true;
-	
+
 		glutTimerFunc(50, animaTorpedoD, 1);
 		glutTimerFunc(50, animaTorpedoE, 1);
 
@@ -128,42 +129,201 @@ void keyboard(unsigned char tecla, int x, int y)
 
 
 }
+//arrumar esse tuabarão aqui
+void desenharTubaraoD(int posicaoX, int posicaoY) {
+	GLfloat circ_pnt = 300;
+	GLfloat ang, raioX = 40.0f, raioY = 10.0f;
+	glTranslatef(posicaoX, posicaoY, 0);
 
+	//TUBARAIO
+	glPushMatrix();
+	glTranslatef(-40, 0, 0);
+	glPushMatrix();
+		glColor3f(0.0, 1.0, 0.0);  // cor
+		glTranslatef(-13, 0, 0);
+	
+		glBegin(GL_POLYGON);
+		for (int i = 0; i < circ_pnt; i++)
+		{
+			ang = (2 * PI * i) / circ_pnt;
+			glVertex2f(cos(ang) * raioX, sin(ang) * raioY);
+		}
+		glEnd();
+	glPopMatrix();
+	//barbatana emcima
+	glPushMatrix();
 
+	glTranslatef(0, 10, 0);
+	glColor3f(0.0, 1.0, 0.0);  // cor
+	glBegin(GL_TRIANGLES);
+	glVertex2f(-5, 15);
+	glVertex2f(-10, -10);
+	glVertex2f(10, -10);
+	glEnd();
 
-void desenhar()
-{
-	//torpedo
-	if (fogo) {
+	glPopMatrix();
 
-		glPushMatrix();
+	//boca
+	glPushMatrix();
+	glTranslatef(-2, 6, 0);
+	glColor3f(0.0, 1.0, 0.0);  // cor
+	glBegin(GL_TRIANGLES);
+	glVertex2f(-6, -25);
+	glVertex2f(-8, -10);
+	glVertex2f(8, -10);
+	glEnd();
 
-			//glTranslatef(50, 0, 0);
-			glTranslatef(tx, ty, 0);
-			glBegin(GL_QUADS);
-				glColor3f(1.0, 0.0, 0.0);  // cor
-				glVertex2f(-10, 10);
-				glVertex2f(40, 10);
-				glVertex2f(40, -10);
-				glVertex2f(-10, -10);
-			glEnd();
-		glPopMatrix();
+	glPopMatrix();
 
+	//rabo1
+	glPushMatrix();
+	glTranslatef(-45, 5, 0);
+	glColor3f(0.0, 1.0, 0.0);  // cor
+	glBegin(GL_TRIANGLES);
+	glVertex2f(-15, 20);
+	glVertex2f(-10, -8);
+	glVertex2f(10, -8);
+	glEnd();
+
+	glPopMatrix();
+
+	//rabo2
+	glPushMatrix();
+	glTranslatef(-45, 5, 0);
+	glColor3f(0.0, 1.0, 0.0);  // cor
+	glBegin(GL_TRIANGLES);
+	glVertex2f(-10, -15);
+	glVertex2f(-10, -8);
+	glVertex2f(10, -8);
+	glEnd();
+
+	glPopMatrix();
+
+	//boca
+	glPushMatrix();
+	glTranslatef(15, -7, 0);
+	glColor3f(0.0, 1.0, 0.0);  // cor
+	glBegin(GL_TRIANGLES);
+	glVertex2f(-10, 3);
+	glVertex2f(12, -3);
+	glVertex2f(5, 5);
+	glEnd();
+
+	glPopMatrix();
+
+	//boca
+	glPushMatrix();
+	glTranslatef(25, -2, 0);
+	glColor3f(0.0, 0.0, 0.0);  // cor
+	glPointSize(3.0f);
+	glBegin(GL_POINTS);
+	glVertex2f(-10, 3);
+	glEnd();
+
+	glPopMatrix();
+	glPopMatrix();
+}
+
+void desenharTubaraoE(int posicaoX, int posicaoY) {
+	GLfloat circ_pnt = 300;
+	GLfloat ang, raioX = 40.0f, raioY = 10.0f;
+	glTranslatef(posicaoX, posicaoY, 0);
+
+	//TUBARAIO
+	glPushMatrix();
+	glTranslatef(-40, 0, 0);
+	glPushMatrix();
+	glColor3f(0.0, 1.0, 0.0);  // cor
+	glTranslatef(-13, 0, 0);
+
+	glBegin(GL_POLYGON);
+	for (int i = 0; i < circ_pnt; i++)
+	{
+		ang = (2 * PI * i) / circ_pnt;
+		glVertex2f(cos(ang) * raioX, sin(ang) * raioY);
 	}
+	glEnd();
+	glPopMatrix();
+	//barbatana emcima
+	glPushMatrix();
 
+	glTranslatef(0, 10, 0);
+	glColor3f(0.0, 1.0, 0.0);  // cor
+	glBegin(GL_TRIANGLES);
+	glVertex2f(-5, 15);
+	glVertex2f(-10, -10);
+	glVertex2f(10, -10);
+	glEnd();
+
+	glPopMatrix();
+
+	//boca
+	glPushMatrix();
+	glTranslatef(-2, 6, 0);
+	glColor3f(0.0, 1.0, 0.0);  // cor
+	glBegin(GL_TRIANGLES);
+	glVertex2f(-6, -25);
+	glVertex2f(-8, -10);
+	glVertex2f(8, -10);
+	glEnd();
+
+	glPopMatrix();
+
+	//rabo1
+	glPushMatrix();
+	glTranslatef(20, 5, 0);
+	glColor3f(0.0, 1.0, 0.0);  // cor
+	glBegin(GL_TRIANGLES);
+	glVertex2f(15, 20);
+	glVertex2f(10, -8);
+	glVertex2f(-10, -8);
+	glEnd();
+
+	glPopMatrix();
+
+	//rabo2
+	glPushMatrix();
+	glTranslatef(45, -25, 0);
+	glColor3f(0.0, 1.0, 0.0);  // cor
+	glBegin(GL_TRIANGLES);
+	glVertex2f(-10, -15);
+	glVertex2f(-10, -8);
+	glVertex2f(-40, -8);
+	glEnd();
+
+	glPopMatrix();
+
+	//boca
+	//glPushMatrix();
+	//glTranslatef(15, -7, 0);
+	//glColor3f(0.0, 1.0, 0.0);  // cor
+	//glBegin(GL_TRIANGLES);
+	//glVertex2f(-10, 3);
+	//glVertex2f(12, -3);
+	//glVertex2f(5, 5);
+	//glEnd();
+
+	//glPopMatrix();
+
+	//olho
+	glPushMatrix();
+	glTranslatef(-25, -2, 0);
+	glColor3f(0.0, 0.0, 0.0);  // cor
+	glPointSize(3.0f);
+	glBegin(GL_POINTS);
+	glVertex2f(-10, 3);
+	glEnd();
+
+	glPopMatrix();
+	glPopMatrix();
+}
+
+void desenhaSubmarino() {
 	GLfloat circ_pnt = 300;
 	GLfloat ang, raioX = 10.0f, raioY = 10.0f;
 	glTranslatef(0, 0, 0);
 
-	glBegin(GL_QUADS);
 
-	glColor3f(1.0, 0.0, 0.0);  // cor
-	glVertex2f(-100, 100);
-	glVertex2f(-5, 100);
-	glVertex2f(-5, 0);
-	glVertex2f(-100, 0);
-
-	glEnd();
 
 	glTranslatef(transX, 0, 0);
 	glTranslatef(0, transY, 0);
@@ -183,15 +343,15 @@ void desenhar()
 
 		//ponta
 		glPushMatrix();
-			glTranslatef(43, 0, 0);
-			glBegin(GL_POLYGON);
-			for (int i = 0; i < circ_pnt; i++)
-			{
-				ang = (2 * PI * i) / circ_pnt;
-				glVertex2f(cos(ang) * raioX, sin(ang) * raioY);
-				//printf("%f %f\n", cos(ang) * raioX, sin(ang) * raioY);
-			}
-			glEnd();
+		glTranslatef(43, 0, 0);
+		glBegin(GL_POLYGON);
+		for (int i = 0; i < circ_pnt; i++)
+		{
+			ang = (2 * PI * i) / circ_pnt;
+			glVertex2f(cos(ang) * raioX, sin(ang) * raioY);
+			//printf("%f %f\n", cos(ang) * raioX, sin(ang) * raioY);
+		}
+		glEnd();
 		glPopMatrix();
 
 		//quadrado em cima
@@ -360,96 +520,75 @@ void desenhar()
 
 		glPopMatrix();
 	}
+}
 
-	//TUBARAIO
+void desenhar()
+{
+	//Ponto do meio da tela
+	glColor3f(1.0, 0.0, 0.0);  // cor
+	glPointSize(5.0f);
+	glBegin(GL_POINTS);
+		glVertex2f(0, 0);
+	glEnd();
+
+	//tela de cima
+	glBegin(GL_QUADS);
+		glColor3f(0.0, 0.0, 1.0);
+		glVertex2f(-400, 400);
+		glColor3f(1.0, 0.0, 0.0);
+		glVertex2f(-400, 250);
+		glVertex2f(400, 250);
+		glColor3f(0.0, 0.0, 1.0);
+		glVertex2f(400, 400);
+	glEnd();
+
+	//tela de baixo
+	glBegin(GL_QUADS);
+		glColor3f(0.66, 0.66, 0.66);
+		glVertex2f(-400, -400);
+		glVertex2f(-400, -250);
+		glVertex2f(400, -250);
+		glVertex2f(400, -400);
+	glEnd();
+
+	//torpedo
+	if (fogo) {
+
+		glPushMatrix();
+
+		//glTranslatef(50, 0, 0);
+		glTranslatef(tx, ty, 0);
+		glBegin(GL_QUADS);
+		glColor3f(1.0, 0.0, 0.0);  // cor
+		glVertex2f(-10, 10);
+		glVertex2f(40, 10);
+		glVertex2f(40, -10);
+		glVertex2f(-10, -10);
+		glEnd();
+		glPopMatrix();
+
+	}
+	
 	glPushMatrix();
-	glTranslatef(-40, 0, 0);
-		glPushMatrix();
-			glColor3f(0.0, 1.0, 0.0);  // cor
-			glTranslatef(-13, 0, 0);
-			raioX = 40.0f, raioY = 10.0f;
-			glBegin(GL_POLYGON);
-			for (int i = 0; i < circ_pnt; i++)
-			{
-				ang = (2 * PI * i) / circ_pnt;
-				glVertex2f(cos(ang) * raioX, sin(ang) * raioY);
-			}
-			glEnd();
-		glPopMatrix();
-		//barbatana emcima
-		glPushMatrix();
+	desenhaSubmarino();
+	glPopMatrix();
+	
 
-		glTranslatef(0, 10, 0);
-			glColor3f(0.0, 1.0, 0.0);  // cor
-			glBegin(GL_TRIANGLES);
-				glVertex2f(-5, 15);
-				glVertex2f(-10, -10);
-				glVertex2f(10, -10);
-			glEnd();
-
-		glPopMatrix();
-
-		//boca
-		glPushMatrix();
-			glTranslatef(-2, 6, 0);
-			glColor3f(0.0, 1.0, 0.0);  // cor
-			glBegin(GL_TRIANGLES);
-				glVertex2f(-6, -25);
-				glVertex2f(-8, -10);
-				glVertex2f(8, -10);
-			glEnd();
-
-		glPopMatrix();
-
-		//rabo1
-		glPushMatrix();
-			glTranslatef(-45, 5, 0);
-			glColor3f(0.0, 1.0, 0.0);  // cor
-			glBegin(GL_TRIANGLES);
-				glVertex2f(-15, 20);
-				glVertex2f(-10, -8);
-				glVertex2f(10, -8);
-			glEnd();
-
-		glPopMatrix();
-
-		//rabo2
-		glPushMatrix();
-			glTranslatef(-45, 5, 0);
-			glColor3f(0.0, 1.0, 0.0);  // cor
-			glBegin(GL_TRIANGLES);
-				glVertex2f(-10, -15);
-				glVertex2f(-10, -8);
-				glVertex2f(10, -8);
-			glEnd();
-
-		glPopMatrix();
-
-		//boca
-		glPushMatrix();
-			glTranslatef(15, -7, 0);
-			glColor3f(0.0, 1.0, 0.0);  // cor
-			glBegin(GL_TRIANGLES);
-				glVertex2f(-10, 3);
-				glVertex2f(12, -3);
-				glVertex2f(5, 5);
-			glEnd();
-
-		glPopMatrix();
-
-		//boca
-		glPushMatrix();
-			glTranslatef(25, -2, 0);
-			glColor3f(0.0, 0.0, 0.0);  // cor
-			glPointSize(3.0f);
-			glBegin(GL_POINTS);
-
-				glVertex2f(-10, 3);
-			glEnd();
-
-		glPopMatrix();
+	glPushMatrix();
+	desenharTubaraoD(-300, 200);
 	glPopMatrix();
 
+	glPushMatrix();
+	desenharTubaraoD(-300, -200);
+	glPopMatrix();
+
+	glPushMatrix();
+	desenharTubaraoE(300, 100);
+	glPopMatrix();
+
+	glPushMatrix();
+	desenharTubaraoE(300, -100);
+	glPopMatrix();
 }
 
 void display()
