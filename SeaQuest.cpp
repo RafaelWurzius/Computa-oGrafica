@@ -10,9 +10,17 @@
 #define janela_altura 800
 #define janela_largura 800
 
-// variaveis que armazenam a translacao no quadro
-float tx = 0.0;
-float ty = 0.0;
+// posição do torpedo
+float toX = 0.0;
+float toY = 0.0;
+
+// posição dos tubarões
+float tuX = 0.0;
+float tuY = 0.0;
+
+//barra de oxigenio
+float oxigenio = 300.0;
+
 // incremento em variaveis.
 float xStep = 10;
 float yStep = 10;
@@ -30,6 +38,8 @@ void tela(GLsizei w, GLsizei h);
 void keyboard(unsigned char tecla, int x, int y);
 void animaTorpedoD(int valor);
 void animaTorpedoE(int valor);
+void animaTubarao(int valor);
+void animaOxigenio(int valor);
 
 int main(int argc, char** argv)
 {
@@ -46,6 +56,8 @@ int main(int argc, char** argv)
 	glutKeyboardFunc(&keyboard);  // chama teclado
 	glutReshapeFunc(tela);  // configura a tela
 	glutDisplayFunc(display);
+	glutTimerFunc(50, animaTubarao, 1);
+	glutTimerFunc(50, animaOxigenio, 1);
 
 	glutMainLoop(); // redesenhar
 
@@ -55,7 +67,7 @@ int main(int argc, char** argv)
 void animaTorpedoD(int valor) {
 
 	if (continuarD) {
-		tx += xStep;
+		toX += xStep;
 
 		glutPostRedisplay();
 		glutTimerFunc(50, animaTorpedoD, 1);
@@ -66,11 +78,32 @@ void animaTorpedoD(int valor) {
 void animaTorpedoE(int valor) {
 
 	if (continuarE) {
-		tx -= xStep;
+		toX -= xStep;
 
 		glutPostRedisplay();
 		glutTimerFunc(50, animaTorpedoE, 1);
 	}
+}
+
+void animaTubarao(int valor) {
+		tuX -= xStep;
+
+		glutPostRedisplay();
+		glutTimerFunc(50, animaTubarao, 1);
+}
+
+void animaOxigenio(int valor) {
+	if (oxigenio > -300) {
+		oxigenio -= 1;
+	}
+	else {
+		//aqui trata quando o oxigenio acaba
+	}
+
+
+	glutPostRedisplay();
+	glutTimerFunc(50, animaOxigenio, 1);
+
 }
 
 
@@ -106,16 +139,15 @@ void keyboard(unsigned char tecla, int x, int y)
 
 
 		if (direita) {
-			tx = transX + 110;
-			ty = transY;
-
+			toX = transX + 110;
+			toY = transY;
 			continuarE = false;
 			continuarD = true;
 			exit;
 		}
 		else {
-			tx = transX - 10;
-			ty = transY;
+			toX = transX - 10;
+			toY = transY;
 			continuarD = false;
 			continuarE = true;
 			exit;
@@ -129,7 +161,7 @@ void keyboard(unsigned char tecla, int x, int y)
 
 
 }
-//arrumar esse tuabarão aqui
+
 void desenharTubaraoD(int posicaoX, int posicaoY) {
 	GLfloat circ_pnt = 300;
 	GLfloat ang, raioX = 40.0f, raioY = 10.0f;
@@ -139,16 +171,16 @@ void desenharTubaraoD(int posicaoX, int posicaoY) {
 	glPushMatrix();
 	glTranslatef(-40, 0, 0);
 	glPushMatrix();
-		glColor3f(0.0, 1.0, 0.0);  // cor
-		glTranslatef(-13, 0, 0);
-	
-		glBegin(GL_POLYGON);
-		for (int i = 0; i < circ_pnt; i++)
-		{
-			ang = (2 * PI * i) / circ_pnt;
-			glVertex2f(cos(ang) * raioX, sin(ang) * raioY);
-		}
-		glEnd();
+	glColor3f(0.0, 1.0, 0.0);  // cor
+	glTranslatef(-13, 0, 0);
+
+	glBegin(GL_POLYGON);
+	for (int i = 0; i < circ_pnt; i++)
+	{
+		ang = (2 * PI * i) / circ_pnt;
+		glVertex2f(cos(ang) * raioX, sin(ang) * raioY);
+	}
+	glEnd();
 	glPopMatrix();
 	//barbatana emcima
 	glPushMatrix();
@@ -251,20 +283,20 @@ void desenharTubaraoE(int posicaoX, int posicaoY) {
 	glColor3f(0.0, 1.0, 0.0);  // cor
 	glBegin(GL_TRIANGLES);
 	glVertex2f(-5, 15);
-	glVertex2f(-10, -10);
-	glVertex2f(10, -10);
+	glVertex2f(-20, -10);
+	glVertex2f(0, -10);
 	glEnd();
 
 	glPopMatrix();
 
-	//boca
+	//barbatana de baixo 
 	glPushMatrix();
 	glTranslatef(-2, 6, 0);
 	glColor3f(0.0, 1.0, 0.0);  // cor
 	glBegin(GL_TRIANGLES);
 	glVertex2f(-6, -25);
-	glVertex2f(-8, -10);
-	glVertex2f(8, -10);
+	glVertex2f(-16, -10);
+	glVertex2f(0, -10);
 	glEnd();
 
 	glPopMatrix();
@@ -274,7 +306,7 @@ void desenharTubaraoE(int posicaoX, int posicaoY) {
 	glTranslatef(20, 5, 0);
 	glColor3f(0.0, 1.0, 0.0);  // cor
 	glBegin(GL_TRIANGLES);
-	glVertex2f(15, 20);
+	glVertex2f(18, 20);
 	glVertex2f(10, -8);
 	glVertex2f(-10, -8);
 	glEnd();
@@ -283,27 +315,26 @@ void desenharTubaraoE(int posicaoX, int posicaoY) {
 
 	//rabo2
 	glPushMatrix();
-	glTranslatef(45, -25, 0);
+	glTranslatef(30, -5, 0);
 	glColor3f(0.0, 1.0, 0.0);  // cor
 	glBegin(GL_TRIANGLES);
-	glVertex2f(-10, -15);
-	glVertex2f(-10, -8);
-	glVertex2f(-40, -8);
+	glVertex2f(-17, 0);
+	glVertex2f(0, -8);
+	glVertex2f(0, 8);
 	glEnd();
 
 	glPopMatrix();
 
 	//boca
-	//glPushMatrix();
-	//glTranslatef(15, -7, 0);
-	//glColor3f(0.0, 1.0, 0.0);  // cor
-	//glBegin(GL_TRIANGLES);
-	//glVertex2f(-10, 3);
-	//glVertex2f(12, -3);
-	//glVertex2f(5, 5);
-	//glEnd();
-
-	//glPopMatrix();
+	glPushMatrix();
+		glTranslatef(-35, -7, 0);
+		glColor3f(0.0, 1.0, 0.0);  // cor
+			glBegin(GL_TRIANGLES);
+			glVertex2f(10, 0);
+			glVertex2f(-15, -5);
+			glVertex2f(-5, 5);
+		glEnd();
+	glPopMatrix();
 
 	//olho
 	glPushMatrix();
@@ -528,27 +559,45 @@ void desenhar()
 	glColor3f(1.0, 0.0, 0.0);  // cor
 	glPointSize(5.0f);
 	glBegin(GL_POINTS);
-		glVertex2f(0, 0);
+	glVertex2f(0, 0);
 	glEnd();
 
 	//tela de cima
 	glBegin(GL_QUADS);
-		glColor3f(0.0, 0.0, 1.0);
-		glVertex2f(-400, 400);
-		glColor3f(1.0, 0.0, 0.0);
-		glVertex2f(-400, 250);
-		glVertex2f(400, 250);
-		glColor3f(0.0, 0.0, 1.0);
-		glVertex2f(400, 400);
+	glColor3f(0.0, 0.0, 1.0);
+	glVertex2f(-400, 400);
+	glColor3f(1.0, 0.0, 0.0);
+	glVertex2f(-400, 250);
+	glVertex2f(400, 250);
+	glColor3f(0.0, 0.0, 1.0);
+	glVertex2f(400, 400);
 	glEnd();
 
 	//tela de baixo
 	glBegin(GL_QUADS);
-		glColor3f(0.66, 0.66, 0.66);
-		glVertex2f(-400, -400);
-		glVertex2f(-400, -250);
-		glVertex2f(400, -250);
-		glVertex2f(400, -400);
+	glColor3f(0.66, 0.66, 0.66);
+	glVertex2f(-400, -400);
+	glVertex2f(-400, -250);
+	glVertex2f(400, -250);
+	glVertex2f(400, -400);
+	glEnd();
+
+	//barra de oxigenio total
+	glBegin(GL_QUADS);
+		glColor3f(1, 0, 0);
+		glVertex2f(-300, -350);
+		glVertex2f(-300, -320);
+		glVertex2f(300, -320);
+		glVertex2f(300, -350);
+	glEnd();
+
+	//barra de oxigenio restante
+	glBegin(GL_QUADS);
+		glColor3f(1, 1, 1);
+		glVertex2f(-300, -350);
+		glVertex2f(-300, -320);
+		glVertex2f(oxigenio, -320);
+		glVertex2f(oxigenio, -350);
 	glEnd();
 
 	//torpedo
@@ -557,36 +606,40 @@ void desenhar()
 		glPushMatrix();
 
 		//glTranslatef(50, 0, 0);
-		glTranslatef(tx, ty, 0);
-		glBegin(GL_QUADS);
-		glColor3f(1.0, 0.0, 0.0);  // cor
-		glVertex2f(-10, 10);
-		glVertex2f(40, 10);
-		glVertex2f(40, -10);
-		glVertex2f(-10, -10);
-		glEnd();
+		glTranslatef(toX, toY, 0);
+			glBegin(GL_QUADS);
+			glColor3f(1.0, 0.0, 0.0);  // cor
+			glVertex2f(-10, 10);
+			glVertex2f(40, 10);
+			glVertex2f(40, -10);
+			glVertex2f(-10, -10);
+			glEnd();
 		glPopMatrix();
 
 	}
-	
+
 	glPushMatrix();
 	desenhaSubmarino();
 	glPopMatrix();
-	
+
 
 	glPushMatrix();
+	glTranslatef(tuX, 0, 0);
 	desenharTubaraoD(-300, 200);
 	glPopMatrix();
 
 	glPushMatrix();
+	glTranslatef(tuX, 0, 0);
 	desenharTubaraoD(-300, -200);
 	glPopMatrix();
 
 	glPushMatrix();
+	glTranslatef(tuX, 0, 0);
 	desenharTubaraoE(300, 100);
 	glPopMatrix();
 
 	glPushMatrix();
+	glTranslatef(tuX, 0, 0);
 	desenharTubaraoE(300, -100);
 	glPopMatrix();
 }
@@ -617,7 +670,7 @@ void display()
 		glClearColor(1.0f, 1.0f, 1.0f, 1.0f); // cor do fundo
 	}
 
-	glClear(GL_COLOR_BUFFER_BIT); // EXECUTA LIMPESA
+	glClear(GL_COLOR_BUFFER_BIT); // EXECUTA LIMPEZA
 
 	// Especificar o local aonde o desenho acontece: bem no centro da janela
 	glTranslatef(janela_largura / 2, janela_altura / 2, 0.0f);
