@@ -6,4 +6,4 @@ Esfera e um cubo(criar um cubo(de inox, q refelete bem) do lado da esfera, criar
 
 Animacao
 Barquinho
-Piramede-Cubo_3D ou push-pop(estático, utilização delas) ou PushPop2(mais completo)
+PushPop2
