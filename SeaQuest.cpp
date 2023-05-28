@@ -31,8 +31,8 @@ float oxigenio = 300.0;
 float xStep = 10;
 float yStep = 10;
 
-float transX = 0;
-float transY = 0;
+float transX = -60;
+float transY = 245;
 
 bool direita = false;
 bool fogo = false;
@@ -58,7 +58,7 @@ int main(int argc, char** argv)
 
 	glutInitWindowSize(janela_largura, janela_altura);  // tamanho da janela
 	glutInitWindowPosition(100, 100); // posicao que surge a janela
-	glutCreateWindow("colisao_quadrado"); // cria janela
+	glutCreateWindow("SeaQuest"); // cria janela
 
 	//glutFullScreen();
 	glutKeyboardFunc(&keyboard);  // chama teclado
@@ -96,7 +96,7 @@ void animaTorpedoE(int valor) {
 
 void animaTubaraoD(int valor) {
 	tuXD += 10;
-	
+
 	glutPostRedisplay();
 	glutTimerFunc(velocidadeTubarao, animaTubaraoD, 1);
 }
@@ -127,25 +127,37 @@ void keyboard(unsigned char tecla, int x, int y)
 {
 	if (tecla == 'a')
 	{
-		direita = false;
-		transX = transX - 5;
-		printf("\n o valor de translacao e %.2f\n", transX);
+		if (transX > -430) {
+			direita = false;
+			transX = transX - 5;
+			printf("\n o valor de translacao e %.2f\n", transX);
+		}
+
 	}
 	if (tecla == 'd')
 	{
-		direita = true;
-		transX = transX + 5;
-		printf("\n o valor de translacao e %.2f\n", transX);
+		if (transX < 300) {
+			direita = true;
+			transX = transX + 5;
+			printf("\n o valor de translacao e %.2f\n", transX);
+		}
+
 	}
 	if (tecla == 'w')
 	{
-		transY = transY + 5;
-		printf("\n o valor de translacao e %.2f\n", transY);
+		if (transY < 245) {
+			transY = transY + 5;
+			printf("\n o valor de translacao e %.2f\n", transY);
+		}
+
 	}
 	if (tecla == 's')
 	{
-		transY = transY - 5;
-		printf("\n o valor de translacao e %.2f\n", transY);
+		if (transY > -235) {
+			transY = transY - 5;
+			printf("\n o valor de translacao e %.2f\n", transY);
+		}
+		
 	}
 	if (tecla == ' ') {
 		fogo = true;
@@ -571,45 +583,45 @@ void desenhar()
 	glColor3f(1.0, 0.0, 0.0);  // cor
 	glPointSize(5.0f);
 	glBegin(GL_POINTS);
-		glVertex2f(0, 0);
+	glVertex2f(0, 0);
 	glEnd();
 
 	//tela de cima
 	glBegin(GL_QUADS);
-		glColor3f(0.0, 0.0, 1.0);
-		glVertex2f(-400, 400);
-		glColor3f(1.0, 0.0, 0.0);
-		glVertex2f(-400, 250);
-		glVertex2f(400, 250);
-		glColor3f(0.0, 0.0, 1.0);
-		glVertex2f(400, 400);
+	glColor3f(0.0, 0.0, 1.0);
+	glVertex2f(-400, 400);
+	glColor3f(1.0, 0.0, 0.0);
+	glVertex2f(-400, 250);
+	glVertex2f(400, 250);
+	glColor3f(0.0, 0.0, 1.0);
+	glVertex2f(400, 400);
 	glEnd();
 
 	//tela de baixo
 	glBegin(GL_QUADS);
-		glColor3f(0.66, 0.66, 0.66);
-		glVertex2f(-400, -400);
-		glVertex2f(-400, -250);
-		glVertex2f(400, -250);
-		glVertex2f(400, -400);
+	glColor3f(0.66, 0.66, 0.66);
+	glVertex2f(-400, -400);
+	glVertex2f(-400, -250);
+	glVertex2f(400, -250);
+	glVertex2f(400, -400);
 	glEnd();
 
 	//barra de oxigenio total
 	glBegin(GL_QUADS);
-		glColor3f(1, 0, 0);
-		glVertex2f(-300, -350);
-		glVertex2f(-300, -320);
-		glVertex2f(300, -320);
-		glVertex2f(300, -350);
+	glColor3f(1, 0, 0);
+	glVertex2f(-300, -350);
+	glVertex2f(-300, -320);
+	glVertex2f(300, -320);
+	glVertex2f(300, -350);
 	glEnd();
 
 	//barra de oxigenio restante
 	glBegin(GL_QUADS);
-		glColor3f(1, 1, 1);
-		glVertex2f(-300, -350);
-		glVertex2f(-300, -320);
-		glVertex2f(oxigenio, -320);
-		glVertex2f(oxigenio, -350);
+	glColor3f(1, 1, 1);
+	glVertex2f(-300, -350);
+	glVertex2f(-300, -320);
+	glVertex2f(oxigenio, -320);
+	glVertex2f(oxigenio, -350);
 	glEnd();
 
 	//torpedo
@@ -618,118 +630,122 @@ void desenhar()
 		glPushMatrix();
 
 		//glTranslatef(50, 0, 0);
-			glTranslatef(toX, toY, 0);
-			glBegin(GL_QUADS);
-				glColor3f(1.0, 0.0, 0.0);  // cor
-				glVertex2f(-10, 4);
-				glVertex2f(30, 4);
-				glVertex2f(30, -4);
-				glVertex2f(-10, -4);
-			glEnd();
+		glTranslatef(toX, toY, 0);
+		glBegin(GL_QUADS);
+		glColor3f(1.0, 0.0, 0.0);  // cor
+		glVertex2f(-10, 4);
+		glVertex2f(30, 4);
+		glVertex2f(30, -4);
+		glVertex2f(-10, -4);
+		glEnd();
 		glPopMatrix();
 
 	}
 
 	glPushMatrix();
-		desenhaSubmarino();
+	desenhaSubmarino();
 	glPopMatrix();
 
 	glPushMatrix();
-		glTranslatef(tuXD, tuYD, 0);
+	glTranslatef(tuXD, tuYD, 0);
+
+	if (colisoes[0] == 0) {
 		if (calculaDistancia(tuXD - 400, toX, tuYD + 200, toY) < 15) {
 			colisoes[0] = 1;
 		}
-		if (colisoes[0] == 0) {
-			desenharTubaraoD(-300, 200);
-		}
-		
-		
+		desenharTubaraoD(-300, 200);
+	}
+
+
 	glPopMatrix();
 
 	glPushMatrix();
-		glTranslatef(tuXD, tuYD, 0);
+	glTranslatef(tuXD, tuYD, 0);
+	if (colisoes[1] == 0) {
 		if (calculaDistancia(tuXD - 400, toX, tuYD - 200, toY) < 15) {
 			colisoes[1] = 1;
 		}
-		if (colisoes[1] == 0) {
-			desenharTubaraoD(-300, -200);
-		}
-	
-		
+		desenharTubaraoD(-300, -200);
+	}
+
+
 	glPopMatrix();
 
 	glPushMatrix();
-		glTranslatef(tuXE, tuYE, 0);
+	glTranslatef(tuXE, tuYE, 0);
+	if (colisoes[2] == 0) {
 		if (calculaDistancia(tuXE + 200, toX, tuYE + 100, toY) < 15) {
 			colisoes[2] = 1;
 		}
-		if (colisoes[2] == 0) {
-			desenharTubaraoE(300, 100);
+		desenharTubaraoE(300, 100);
+		printf("Distancia: %f\n", calculaDistancia(tuXE + 170, transX, tuYE + 100, transY));
+		if (calculaDistancia(tuXE + 170, transX, tuYE + 100, transY) < 40) {
+			transX = -50;
+			transY = 245;
+			glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
+			glClear(GL_COLOR_BUFFER_BIT);
+
 		}
-		
-	
+
+	}
 
 	glPopMatrix();
 
 	glPushMatrix();
 		glTranslatef(tuXE, tuYE, 0);
 
-		if (calculaDistancia(tuXE + 200, toX, tuYE - 100, toY) < 15) {
-			colisoes[3] = 1;
-		}
 		if (colisoes[3] == 0) {
+			if (calculaDistancia(tuXE + 200, toX, tuYE - 100, toY) < 15) {
+				colisoes[3] = 1;
+			}
 			desenharTubaraoE(300, -100);
-		}
-		
 
+			if (calculaDistancia(tuXE + 170, transX, tuYE - 100, transY) < 40) {
+				transX = -50;
+				transY = 245;
+				glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
+				glClear(GL_COLOR_BUFFER_BIT);
+
+			}
 			
-		
-		
+		}
+
+
+
 	glPopMatrix();
+
+	//mergulhador
+	glPushMatrix();
+		glColor3f(1, 1, 1);
+		glRectf(-10, 30, 5, 45);
+		glRectf(-20, 10, 0, 20);
+		glRectf(10, 10, 30, 20);
+		glRectf(0, -10, 10, 30);
+		glRectf(-10, -30, 0, -10);
+		glRectf(10, -30, 20, -10);
+	glPopMatrix();
+
 }
 
 float calculaDistancia(int x1, int x2, int y1, int y2) {
 	float distX = x2 - x1;
 	float distY = y2 - y1;
 	float distancia = sqrt(pow(distX, 2) + pow(distY, 2));
-	printf("A distancia eh de : %f \n", distancia);
-	if (distancia < 15) {
-		glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
-		glClear(GL_COLOR_BUFFER_BIT);
-	}
+	//printf("A distancia eh de : %f \n", distancia);
+	//if (distancia < 15) {
+	//	glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
+	//	glClear(GL_COLOR_BUFFER_BIT);
+	//}
 	return distancia;
 }
-
-void Verificacolisao() {
-	
-}
-
 
 void display()
 {
 	glMatrixMode(GL_MODELVIEW);  //coordenadas de desenho
 	glLoadIdentity();
 
-	//tratando colisão
-	//if (transX > -10)
-	//{
-	//	glClearColor(0.0f, 0.0f, 1.0f, 1.0f); // cor do fundo
+	glClearColor(0.0f, 0.0f, 1.0f, 1.0f); // cor do fundo
 
-	//}
-	//else if (transX < -95 * 2 - 10)
-	//{
-	//	glClearColor(0.0f, 0.0f, 1.0f, 1.0f); // cor do fundo
-	//}
-	//else if (transY > 100) {
-	//	glClearColor(0.0f, 0.0f, 1.0f, 1.0f); // cor do fundo
-	//}
-	//else if (transY < -100) {
-		glClearColor(0.0f, 0.0f, 1.0f, 1.0f); // cor do fundo
-	//}
-	//else
-	//{
-	//	glClearColor(1.0f, 1.0f, 1.0f, 1.0f); // cor do fundo
-	//}
 
 	glClear(GL_COLOR_BUFFER_BIT); // EXECUTA LIMPEZA
 
