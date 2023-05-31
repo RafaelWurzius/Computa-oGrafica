@@ -2,17 +2,26 @@
 #include <stdlib.h> 
 #include <GL/glut.h> 
 #include <math.h> 
+#include<time.h>
 #define PI 3.1415926535898  
 
 #define janela_altura 800
 #define janela_largura 800
 
 // velocidade do tubarão e do torpedo
-float velocidadeTubarao = 1000;
-float velocidadeTorpedo = 500;
+float velocidadeTubarao = 500;
+float velocidadeTorpedo = 50;
 
 //colisoes de cada objeto
-int colisoes[] = { 0, 0, 0, 0 };
+int colisoes[] = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
+float posicaoYtubarao[] = {NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL};
+float posicaoXInicialTubarao = 300;
+int nTubaroes = 5;
+
+
+//variaveis temporarias
+float posicao1 = 100;
+float posicao2 = -100;
 
 // posição do torpedo
 float toX = 0.0;
@@ -38,6 +47,7 @@ bool direita = false;
 bool fogo = false;
 bool continuarD = true;
 bool continuarE = true;
+bool iniciaTurno = false;
 
 void display(void);
 void tela(GLsizei w, GLsizei h);
@@ -48,9 +58,13 @@ void animaTubaraoD(int valor);
 void animaTubaraoE(int valor);
 void animaOxigenio(int valor);
 float calculaDistancia(int x1, int x2, int y1, int y2);
+void gerarTubarao();
+void iniciarTurno(int valor);
 
 int main(int argc, char** argv)
 {
+	srand(time(NULL));
+
 	glutInit(&argc, argv);	// suporte a janelas
 
 	glutInitDisplayMode(GLUT_SINGLE | GLUT_RGB);
@@ -67,6 +81,7 @@ int main(int argc, char** argv)
 	glutTimerFunc(velocidadeTubarao, animaTubaraoD, 1);
 	glutTimerFunc(velocidadeTubarao, animaTubaraoE, 1);
 	glutTimerFunc(50, animaOxigenio, 1);
+	glutTimerFunc(3000, iniciarTurno, 1);
 
 	glutMainLoop(); // redesenhar
 
@@ -583,7 +598,7 @@ void desenhar()
 	glColor3f(1.0, 0.0, 0.0);  // cor
 	glPointSize(5.0f);
 	glBegin(GL_POINTS);
-	glVertex2f(0, 0);
+		glVertex2f(0, 0);
 	glEnd();
 
 	//tela de cima
@@ -643,87 +658,188 @@ void desenhar()
 	}
 
 	glPushMatrix();
-	desenhaSubmarino();
+		desenhaSubmarino();
 	glPopMatrix();
 
-	glPushMatrix();
-	glTranslatef(tuXD, tuYD, 0);
+	//glPushMatrix();
+	//glTranslatef(tuXD, tuYD, 0);
 
-	if (colisoes[0] == 0) {
-		if (calculaDistancia(tuXD - 400, toX, tuYD + 200, toY) < 15) {
-			colisoes[0] = 1;
-		}
-		desenharTubaraoD(-300, 200);
+	//if (colisoes[0] == 0) {
+	//	if (calculaDistancia(tuXD - 400, toX, tuYD + 200, toY) < 15) {
+	//		colisoes[0] = 1;
+	//	}
+	//	desenharTubaraoD(-300, 200);
+	//}
+
+
+	//glPopMatrix();
+
+	//glPushMatrix();
+	//glTranslatef(tuXD, tuYD, 0);
+	//if (colisoes[1] == 0) {
+	//	if (calculaDistancia(tuXD - 400, toX, tuYD - 200, toY) < 15) {
+	//		colisoes[1] = 1;
+	//	}
+	//	desenharTubaraoD(-300, -200);
+	//}
+
+
+	//glPopMatrix();
+
+	//glPushMatrix();
+	//glTranslatef(tuXE, tuYE, 0);
+	//if (colisoes[2] == 0) {
+	//	if (calculaDistancia(tuXE + 200, toX, tuYE + 100, toY) < 15) {
+	//		colisoes[2] = 1;
+	//	}
+	//	desenharTubaraoE(300, 100);
+	//	printf("Distancia: %f\n", calculaDistancia(tuXE + 170, transX, tuYE + 100, transY));
+	//	if (calculaDistancia(tuXE + 170, transX, tuYE + 100, transY) < 40) {
+	//		transX = -50;
+	//		transY = 245;
+	//		glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
+	//		glClear(GL_COLOR_BUFFER_BIT);
+
+	//	}
+
+	//}
+
+	//glPopMatrix();
+
+//	if (iniciaTurno) {
+		glPushMatrix();
+			gerarTubarao();
+		glPopMatrix();
+	//}
+	
+
+
+
+		//mergulhador
+		glPushMatrix();
+	
+			glScalef(0.5, 0.5, 0.5);
+			glColor3f(1, 1, 1);
+			glRectf(-10, 30, 5, 45);
+			glRectf(-20, 10, 0, 20);
+			glRectf(10, 10, 30, 20);
+			glRectf(0, -10, 10, 30);
+			glRectf(-10, -30, 0, -10);
+			glRectf(10, -30, 20, -10);
+		glPopMatrix();
+
+
+
+}
+//por enquanto tá tudo tranquilo aqui
+void iniciarTurno(int valor) {
+	int posicaoYEspecifica;
+	bool novoValor;
+
+	for (int i = 0; i < 10; i++) {
+		colisoes[i] = 0;
 	}
 
+	for (int i = 0; i < 10; i++) {
+		novoValor = true;
 
-	glPopMatrix();
+		posicaoYEspecifica = rand() % 15 - 8;
 
-	glPushMatrix();
-	glTranslatef(tuXD, tuYD, 0);
-	if (colisoes[1] == 0) {
-		if (calculaDistancia(tuXD - 400, toX, tuYD - 200, toY) < 15) {
-			colisoes[1] = 1;
-		}
-		desenharTubaraoD(-300, -200);
-	}
-
-
-	glPopMatrix();
-
-	glPushMatrix();
-	glTranslatef(tuXE, tuYE, 0);
-	if (colisoes[2] == 0) {
-		if (calculaDistancia(tuXE + 200, toX, tuYE + 100, toY) < 15) {
-			colisoes[2] = 1;
-		}
-		desenharTubaraoE(300, 100);
-		printf("Distancia: %f\n", calculaDistancia(tuXE + 170, transX, tuYE + 100, transY));
-		if (calculaDistancia(tuXE + 170, transX, tuYE + 100, transY) < 40) {
-			transX = -50;
-			transY = 245;
-			glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
-			glClear(GL_COLOR_BUFFER_BIT);
-
-		}
-
-	}
-
-	glPopMatrix();
-
-	glPushMatrix();
-		glTranslatef(tuXE, tuYE, 0);
-
-		if (colisoes[3] == 0) {
-			if (calculaDistancia(tuXE + 200, toX, tuYE - 100, toY) < 15) {
-				colisoes[3] = 1;
+		for (int j = 0; j < 10; j++) {
+			if (posicaoYEspecifica == posicaoYtubarao[j] / 30) {
+				novoValor = false;
+				break;
 			}
-			desenharTubaraoE(300, -100);
+		}
 
-			if (calculaDistancia(tuXE + 170, transX, tuYE - 100, transY) < 40) {
+		if (novoValor) {
+			posicaoYtubarao[i] = posicaoYEspecifica * 30;
+		}
+		else {
+			i--;
+		}
+
+	}
+
+	tuXE = 0;
+	tuYE = 0;
+	iniciaTurno = false;	
+	iniciaTurno = true;
+	
+
+	glutPostRedisplay();
+	glutTimerFunc(10000, iniciarTurno, 1);
+
+}
+void gerarTubarao() {
+
+	
+	//movimenta o tubarão
+	glTranslatef(tuXE, tuYE, 0);
+
+	for (int i = 0; i < nTubaroes; i++) {
+		/*printf("valor de i: %i\n", i);*/
+
+		if (colisoes[i] == 0) {
+			//colisão do tubarão como torpedo (- 50 é para ajustar o ponto de colisão no meio de cada desenho)
+			//if (calculaDistancia(tuXE, toX, tuYE, toY) < 15) {
+			if (calculaDistancia(posicaoXInicialTubarao - 50,		 toX - tuXE,		tuYE + posicaoYtubarao[i], toY - tuYE) < 15) {
+				colisoes[i] = 1;
+				printf("valor de que colidiu i: %i\n", i);
+				//Descobrir pq ele colidiu nos 5????? ACHO Q É PQ ELE TÁ CALCULANDO O MESMO LOGAR PRA TODOS
+				//entender bem o calculo da colisão e arrumar isso ai
+			}
+
+			////Ponto do tubarão
+			//glColor3f(0.0, 0.0, 0.0);  // cor
+			//glPointSize(5.0f);
+			//glBegin(GL_POINTS);
+			//glVertex2f(posicaoXInicialTubarao - 50, tuYE + posicaoYtubarao[i]);
+			//glEnd();
+
+			////Ponto do torpedo 
+			//glColor3f(0.0, 0.0, 0.0);  // cor
+			//glPointSize(5.0f);
+			//glBegin(GL_POINTS);
+			//glVertex2f(toX - tuXE, toY - tuYE);
+			//glEnd();
+	
+			glPushMatrix();
+				desenharTubaraoE(posicaoXInicialTubarao, posicaoYtubarao[i]);
+			glPopMatrix();
+
+			//if (calculaDistancia(tuXE + 170, transX, tuYE - 100, transY) < 40) {
+			//	transX = -50;
+			//	transY = 245;
+			//	glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
+			//	glClear(GL_COLOR_BUFFER_BIT);
+			//}
+
+			//Ponto do tubarão
+			//glColor3f(0.0, 0.0, 0.0);  // cor
+			//glPointSize(5.0f);
+			//glBegin(GL_POINTS);
+			//glVertex2f(posicaoXInicialTubarao - 50, tuYE + posicaoYtubarao[i]);
+			//glEnd();
+
+			//Ponto do submarino
+			//glColor3f(0.0, 0.0, 0.0);  // cor
+			//glPointSize(5.0f);
+			//glBegin(GL_POINTS);
+			//glVertex2f(transX - tuXE + 60, transY - tuYE);
+			//glEnd();
+
+			//colisão do tubarão como submarino (- 50 e + 60 são para ajustar o ponto de colisão no meio de cada desenho)
+			if (calculaDistancia(posicaoXInicialTubarao - 50,		transX - tuXE + 60,		 tuYE + posicaoYtubarao[i],		 transY - tuYE) < 40) {
 				transX = -50;
 				transY = 245;
 				glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
 				glClear(GL_COLOR_BUFFER_BIT);
-
 			}
-			
+
 		}
-
-
-
-	glPopMatrix();
-
-	//mergulhador
-	glPushMatrix();
-		glColor3f(1, 1, 1);
-		glRectf(-10, 30, 5, 45);
-		glRectf(-20, 10, 0, 20);
-		glRectf(10, 10, 30, 20);
-		glRectf(0, -10, 10, 30);
-		glRectf(-10, -30, 0, -10);
-		glRectf(10, -30, 20, -10);
-	glPopMatrix();
+	}
+	
 
 }
 
@@ -731,11 +847,6 @@ float calculaDistancia(int x1, int x2, int y1, int y2) {
 	float distX = x2 - x1;
 	float distY = y2 - y1;
 	float distancia = sqrt(pow(distX, 2) + pow(distY, 2));
-	//printf("A distancia eh de : %f \n", distancia);
-	//if (distancia < 15) {
-	//	glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
-	//	glClear(GL_COLOR_BUFFER_BIT);
-	//}
 	return distancia;
 }
 
@@ -775,7 +886,10 @@ void tela(GLsizei w, GLsizei h)
 
 
 	//TODO
-	//
+	// gerar tubarões por tempo de um lado
+	// dos dois lados
+	// lugares aleatórios
+	
 	//colisão com tubarões
 	//pessoinha e colisão com ela
 	//vida
