@@ -12,12 +12,16 @@
 float velocidadeTubarao = 500;
 float velocidadeTorpedo = 50;
 
+int posicaoCoracao = -250;
 //colisoes de cada objeto
 int colisoes[] = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
 float posicaoYtubarao[] = {NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL};
 float posicaoXInicialTubarao = 300;
-int nTubaroes = 5;
+float posicaoYInicialTubarao = -300;
+int nTubaroes = 0;
 
+int vidas = 3;
+int pontos = 0;
 
 //variaveis temporarias
 float posicao1 = 100;
@@ -58,8 +62,11 @@ void animaTubaraoD(int valor);
 void animaTubaraoE(int valor);
 void animaOxigenio(int valor);
 float calculaDistancia(int x1, int x2, int y1, int y2);
-void gerarTubarao();
+void gerarTubaraoD();
+void gerarTubaraoE();
 void iniciarTurno(int valor);
+void atualizaVida();
+void mostraPontos(int number);
 
 int main(int argc, char** argv)
 {
@@ -128,7 +135,14 @@ void animaOxigenio(int valor) {
 		oxigenio -= 1;
 	}
 	else {
-		//aqui trata quando o oxigenio acaba
+		vidas -= 1;
+		oxigenio = 300;
+		transX = -50;
+		transY = 245;
+	}
+
+	if (transY == 245) {
+		oxigenio = 300;
 	}
 
 
@@ -708,7 +722,11 @@ void desenhar()
 
 //	if (iniciaTurno) {
 		glPushMatrix();
-			gerarTubarao();
+			gerarTubaraoD();
+		glPopMatrix();
+
+		glPushMatrix();
+			gerarTubaraoE();
 		glPopMatrix();
 	//}
 	
@@ -728,13 +746,98 @@ void desenhar()
 			glRectf(10, -30, 20, -10);
 		glPopMatrix();
 
+		//desenha corações
+		glPushMatrix();
+			atualizaVida();
+		glPopMatrix();
 
+		mostraPontos(pontos);
 
 }
+
+void mostraPontos(int number) {
+	glColor3f(1.0f, 1.0f, 1.0f);
+	//numero a ser renderizado
+	//int number = 12345;
+	//coordenada x
+	int x = 0;
+	// Renderiza cada dígito do número
+	while (number > 0) {
+		int digit = number % 10;
+		number /= 10;
+
+		// Renderiza o dígito na posição atual
+		glRasterPos2f(x, 350);
+		glutBitmapCharacter(GLUT_BITMAP_TIMES_ROMAN_24, '0' + digit);
+
+		// Atualiza a posição para o próximo dígito
+		x -= 20;
+	}
+}
+
+void desenhaCoracao(int x) {
+
+	glPushMatrix();
+		glTranslatef(x, 300, 0);
+
+	
+		glScalef(30, 30, 30);
+		glColor3f(1.0f, 1.0f, 0.0f);
+
+		glBegin(GL_POLYGON);
+			glVertex2f(0.0f, 0.0f);
+			glVertex2f(-0.3f, 0.4f);
+			glVertex2f(-0.8f, 0.0f);
+			glVertex2f(-0.6f, -0.4f);
+			glVertex2f(0.0f, -0.8f);
+			glVertex2f(0.6f, -0.4f);
+			glVertex2f(0.8f, 0.0f);
+			glVertex2f(0.3f, 0.4f);
+		glEnd();
+	glPopMatrix();
+
+}
+void atualizaVida() {
+	//diminui um coração
+
+	if (vidas == 0) {
+		//GAME OVER
+	}else if (vidas == 1) {
+
+		desenhaCoracao(-300);
+
+	}else if (vidas == 2) {
+
+		desenhaCoracao(-300);
+		desenhaCoracao(-230);
+	}else if (vidas == 3) {
+
+		desenhaCoracao(-300);
+		desenhaCoracao(-230);
+		desenhaCoracao(-160);
+	}
+
+	//for (int i = 0; i < vidas; i++) {
+
+	//	//Desenha coração 
+
+
+
+
+	//
+
+	//	posicaoCoracao = posicaoCoracao + 100;
+	//}
+	//posicaoCoracao = -250;
+}
+
+
+
 //por enquanto tá tudo tranquilo aqui
 void iniciarTurno(int valor) {
 	int posicaoYEspecifica;
 	bool novoValor;
+	nTubaroes++;
 
 	for (int i = 0; i < 10; i++) {
 		colisoes[i] = 0;
@@ -763,6 +866,8 @@ void iniciarTurno(int valor) {
 
 	tuXE = 0;
 	tuYE = 0;
+	tuXD = 0;
+	tuYD = 0;
 	iniciaTurno = false;	
 	iniciaTurno = true;
 	
@@ -771,19 +876,18 @@ void iniciarTurno(int valor) {
 	glutTimerFunc(10000, iniciarTurno, 1);
 
 }
-void gerarTubarao() {
-
-	
+void gerarTubaraoD() {
 	//movimenta o tubarão
 	glTranslatef(tuXE, tuYE, 0);
 
-	for (int i = 0; i < nTubaroes; i++) {
+	for (int i = 0; i < nTubaroes/2; i++) {
 		/*printf("valor de i: %i\n", i);*/
 
 		if (colisoes[i] == 0) {
 			//colisão do tubarão como torpedo (- 50 é para ajustar o ponto de colisão no meio de cada desenho)
 			//if (calculaDistancia(tuXE, toX, tuYE, toY) < 15) {
 			if (calculaDistancia(posicaoXInicialTubarao - 50,		 toX - tuXE,		tuYE + posicaoYtubarao[i], toY - tuYE) < 15) {
+				pontos += 100;
 				colisoes[i] = 1;
 				printf("valor de que colidiu i: %i\n", i);
 				//Descobrir pq ele colidiu nos 5????? ACHO Q É PQ ELE TÁ CALCULANDO O MESMO LOGAR PRA TODOS
@@ -831,6 +935,80 @@ void gerarTubarao() {
 
 			//colisão do tubarão como submarino (- 50 e + 60 são para ajustar o ponto de colisão no meio de cada desenho)
 			if (calculaDistancia(posicaoXInicialTubarao - 50,		transX - tuXE + 60,		 tuYE + posicaoYtubarao[i],		 transY - tuYE) < 40) {
+				vidas -= 1;
+				transX = -50;
+				transY = 245;
+				glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
+				glClear(GL_COLOR_BUFFER_BIT);
+
+
+			}
+
+		}
+	}
+	
+
+}
+
+void gerarTubaraoE() {
+	//movimenta o tubarão
+	glTranslatef(tuXD, tuYD, 0);
+
+	for (int i = nTubaroes / 2; i < nTubaroes; i++) {
+		/*printf("valor de i: %i\n", i);*/
+
+		if (colisoes[i] == 0) {
+			//colisão do tubarão como torpedo (- 50 é para ajustar o ponto de colisão no meio de cada desenho)
+			if (calculaDistancia(posicaoYInicialTubarao - 50, toX - tuXD, tuYD + posicaoYtubarao[i], toY - tuYD) < 15) {
+				pontos += 100;
+				colisoes[i] = 1;
+				printf("valor de que colidiu i: %i\n", i);
+				//Descobrir pq ele colidiu nos 5????? ACHO Q É PQ ELE TÁ CALCULANDO O MESMO LOGAR PRA TODOS
+				//entender bem o calculo da colisão e arrumar isso ai
+			}
+
+			////Ponto do tubarão
+			//glColor3f(0.0, 0.0, 0.0);  // cor
+			//glPointSize(5.0f);
+			//glBegin(GL_POINTS);
+			//glVertex2f(posicaoXInicialTubarao - 50, tuYE + posicaoYtubarao[i]);
+			//glEnd();
+
+			////Ponto do torpedo 
+			//glColor3f(0.0, 0.0, 0.0);  // cor
+			//glPointSize(5.0f);
+			//glBegin(GL_POINTS);
+			//glVertex2f(toX - tuXE, toY - tuYE);
+			//glEnd();
+
+			glPushMatrix();
+				desenharTubaraoD(posicaoYInicialTubarao, posicaoYtubarao[i]);
+			glPopMatrix();
+
+			//if (calculaDistancia(tuXE + 170, transX, tuYE - 100, transY) < 40) {
+			//	transX = -50;
+			//	transY = 245;
+			//	glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
+			//	glClear(GL_COLOR_BUFFER_BIT);
+			//}
+
+			//Ponto do tubarão
+			//glColor3f(0.0, 0.0, 0.0);  // cor
+			//glPointSize(5.0f);
+			//glBegin(GL_POINTS);
+			//glVertex2f(posicaoXInicialTubarao - 50, tuYE + posicaoYtubarao[i]);
+			//glEnd();
+
+			//Ponto do submarino
+			//glColor3f(0.0, 0.0, 0.0);  // cor
+			//glPointSize(5.0f);
+			//glBegin(GL_POINTS);
+			//glVertex2f(transX - tuXE + 60, transY - tuYE);
+			//glEnd();
+
+			//colisão do tubarão como submarino (- 50 e + 60 são para ajustar o ponto de colisão no meio de cada desenho)
+			if (calculaDistancia(posicaoYInicialTubarao - 50, transX - tuXD + 60, tuYD + posicaoYtubarao[i], transY - tuYD) < 40) {
+				vidas -= 1;
 				transX = -50;
 				transY = 245;
 				glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
@@ -839,7 +1017,7 @@ void gerarTubarao() {
 
 		}
 	}
-	
+
 
 }
 
@@ -886,14 +1064,9 @@ void tela(GLsizei w, GLsizei h)
 
 
 	//TODO
-	// gerar tubarões por tempo de um lado
-	// dos dois lados
-	// lugares aleatórios
-	
-	//colisão com tubarões
 	//pessoinha e colisão com ela
-	//vida
-	//esgotar tempo e morrer
+	//fazer com q o tiro não aumente a velocidade
+	//fazer uma tela de gamerover
 
 
 
