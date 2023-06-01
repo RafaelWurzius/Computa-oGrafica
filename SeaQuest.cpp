@@ -8,24 +8,23 @@
 #define janela_altura 800
 #define janela_largura 800
 
-// velocidade do tubarão e do torpedo
-float velocidadeTubarao = 500;
+// velocidades
+float velocidadeTubarao = 100;
 float velocidadeTorpedo = 50;
+float velocidadeMergulhador = 300;
+float tempoDoTurno = 15000;
 
-int posicaoCoracao = -250;
 //colisoes de cada objeto
 int colisoes[] = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
 float posicaoYtubarao[] = {NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL};
-float posicaoXInicialTubarao = 300;
-float posicaoYInicialTubarao = -300;
+float posicaoXInicialTubarao = 400;
+float posicaoYInicialTubarao = -400;
 int nTubaroes = 0;
 
 int vidas = 3;
+int posicaoCoracao = -250;
 int pontos = 0;
-
-//variaveis temporarias
-float posicao1 = 100;
-float posicao2 = -100;
+bool iniciaTurno = false;
 
 // posição do torpedo
 float toX = 0.0;
@@ -44,14 +43,23 @@ float oxigenio = 300.0;
 float xStep = 10;
 float yStep = 10;
 
+// posição do submarino
 float transX = -60;
 float transY = 245;
 
+//variaáveis do mergulhador
+int lado;
+float meX = 0;
+float meY = 0;
+bool continuaMergulhador = false;
+bool colisaoMergulhador = false;
+float zeraMovMergulhador = 0;
+
+//variáveis de controle do torpedo
 bool direita = false;
 bool fogo = false;
 bool continuarD = true;
 bool continuarE = true;
-bool iniciaTurno = false;
 
 void display(void);
 void tela(GLsizei w, GLsizei h);
@@ -67,6 +75,9 @@ void gerarTubaraoE();
 void iniciarTurno(int valor);
 void atualizaVida();
 void mostraPontos(int number);
+void desenhaMergulhador(int x, int y);
+void animaMergulhador(int valor);
+void gameOver();
 
 int main(int argc, char** argv)
 {
@@ -75,7 +86,6 @@ int main(int argc, char** argv)
 	glutInit(&argc, argv);	// suporte a janelas
 
 	glutInitDisplayMode(GLUT_SINGLE | GLUT_RGB);
-	// PADRAO DE CORES
 
 	glutInitWindowSize(janela_largura, janela_altura);  // tamanho da janela
 	glutInitWindowPosition(100, 100); // posicao que surge a janela
@@ -95,11 +105,11 @@ int main(int argc, char** argv)
 	return(0);
 }
 
+
 void animaTorpedoD(int valor) {
 
 	if (continuarD) {
 		toX += xStep;
-
 		glutPostRedisplay();
 		glutTimerFunc(velocidadeTorpedo, animaTorpedoD, 1);
 	}
@@ -110,7 +120,6 @@ void animaTorpedoE(int valor) {
 
 	if (continuarE) {
 		toX -= xStep;
-
 		glutPostRedisplay();
 		glutTimerFunc(velocidadeTorpedo, animaTorpedoE, 1);
 	}
@@ -118,14 +127,12 @@ void animaTorpedoE(int valor) {
 
 void animaTubaraoD(int valor) {
 	tuXD += 10;
-
 	glutPostRedisplay();
 	glutTimerFunc(velocidadeTubarao, animaTubaraoD, 1);
 }
 
 void animaTubaraoE(int valor) {
 	tuXE -= 10;
-
 	glutPostRedisplay();
 	glutTimerFunc(velocidadeTubarao, animaTubaraoE, 1);
 }
@@ -133,8 +140,7 @@ void animaTubaraoE(int valor) {
 void animaOxigenio(int valor) {
 	if (oxigenio > -300) {
 		oxigenio -= 1;
-	}
-	else {
+	}else {
 		vidas -= 1;
 		oxigenio = 300;
 		transX = -50;
@@ -145,12 +151,9 @@ void animaOxigenio(int valor) {
 		oxigenio = 300;
 	}
 
-
 	glutPostRedisplay();
 	glutTimerFunc(50, animaOxigenio, 1);
-
 }
-
 
 void keyboard(unsigned char tecla, int x, int y)
 {
@@ -159,7 +162,6 @@ void keyboard(unsigned char tecla, int x, int y)
 		if (transX > -430) {
 			direita = false;
 			transX = transX - 5;
-			printf("\n o valor de translacao e %.2f\n", transX);
 		}
 
 	}
@@ -168,7 +170,6 @@ void keyboard(unsigned char tecla, int x, int y)
 		if (transX < 300) {
 			direita = true;
 			transX = transX + 5;
-			printf("\n o valor de translacao e %.2f\n", transX);
 		}
 
 	}
@@ -176,7 +177,6 @@ void keyboard(unsigned char tecla, int x, int y)
 	{
 		if (transY < 245) {
 			transY = transY + 5;
-			printf("\n o valor de translacao e %.2f\n", transY);
 		}
 
 	}
@@ -184,16 +184,13 @@ void keyboard(unsigned char tecla, int x, int y)
 	{
 		if (transY > -235) {
 			transY = transY - 5;
-			printf("\n o valor de translacao e %.2f\n", transY);
 		}
 		
 	}
 	if (tecla == ' ') {
 		fogo = true;
-
 		glutTimerFunc(velocidadeTorpedo, animaTorpedoD, 1);
 		glutTimerFunc(velocidadeTorpedo, animaTorpedoE, 1);
-
 
 		if (direita) {
 			toX = transX + 110;
@@ -201,8 +198,7 @@ void keyboard(unsigned char tecla, int x, int y)
 			continuarE = false;
 			continuarD = true;
 			exit;
-		}
-		else {
+		}else {
 			toX = transX - 10;
 			toY = transY;
 			continuarD = false;
@@ -210,13 +206,8 @@ void keyboard(unsigned char tecla, int x, int y)
 			exit;
 		}
 		printf("FOGO!");
-
 	}
-
-
 	glutPostRedisplay();
-
-
 }
 
 void desenharTubaraoD(int posicaoX, int posicaoY) {
@@ -224,92 +215,92 @@ void desenharTubaraoD(int posicaoX, int posicaoY) {
 	GLfloat ang, raioX = 40.0f, raioY = 10.0f;
 	glTranslatef(posicaoX, posicaoY, 0);
 
-	//TUBARAIO
+	//Tubarão
 	glPushMatrix();
-	glTranslatef(-40, 0, 0);
-	glPushMatrix();
-	glColor3f(0.0, 1.0, 0.0);  // cor
-	glTranslatef(-13, 0, 0);
+		glTranslatef(-40, 0, 0);
+		glPushMatrix();
+			glColor3f(0.0, 1.0, 0.0);  
+			glTranslatef(-13, 0, 0);
 
-	glBegin(GL_POLYGON);
-	for (int i = 0; i < circ_pnt; i++)
-	{
-		ang = (2 * PI * i) / circ_pnt;
-		glVertex2f(cos(ang) * raioX, sin(ang) * raioY);
-	}
-	glEnd();
-	glPopMatrix();
-	//barbatana emcima
-	glPushMatrix();
+			glBegin(GL_POLYGON);
+				for (int i = 0; i < circ_pnt; i++)
+				{
+					ang = (2 * PI * i) / circ_pnt;
+					glVertex2f(cos(ang) * raioX, sin(ang) * raioY);
+				}
+			glEnd();
+		glPopMatrix();
 
-	glTranslatef(0, 10, 0);
-	glColor3f(0.0, 1.0, 0.0);  // cor
-	glBegin(GL_TRIANGLES);
-	glVertex2f(-5, 15);
-	glVertex2f(-10, -10);
-	glVertex2f(10, -10);
-	glEnd();
+		//Barbatana de cima
+		glPushMatrix();
 
-	glPopMatrix();
+			glTranslatef(0, 10, 0);
+			glColor3f(0.0, 1.0, 0.0);
+			glBegin(GL_TRIANGLES);
+				glVertex2f(-5, 15);
+				glVertex2f(-10, -10);
+				glVertex2f(10, -10);
+			glEnd();
 
-	//boca
-	glPushMatrix();
-	glTranslatef(-2, 6, 0);
-	glColor3f(0.0, 1.0, 0.0);  // cor
-	glBegin(GL_TRIANGLES);
-	glVertex2f(-6, -25);
-	glVertex2f(-8, -10);
-	glVertex2f(8, -10);
-	glEnd();
+		glPopMatrix();
 
-	glPopMatrix();
+		//boca
+		glPushMatrix();
+			glTranslatef(-2, 6, 0);
+			glColor3f(0.0, 1.0, 0.0);  // cor
+			glBegin(GL_TRIANGLES);
+				glVertex2f(-6, -25);
+				glVertex2f(-8, -10);
+				glVertex2f(8, -10);
+			glEnd();
 
-	//rabo1
-	glPushMatrix();
-	glTranslatef(-45, 5, 0);
-	glColor3f(0.0, 1.0, 0.0);  // cor
-	glBegin(GL_TRIANGLES);
-	glVertex2f(-15, 20);
-	glVertex2f(-10, -8);
-	glVertex2f(10, -8);
-	glEnd();
+		glPopMatrix();
 
-	glPopMatrix();
+		//rabo1
+		glPushMatrix();
+			glTranslatef(-45, 5, 0);
+			glColor3f(0.0, 1.0, 0.0);  // cor
+			glBegin(GL_TRIANGLES);
+				glVertex2f(-15, 20);
+				glVertex2f(-10, -8);
+				glVertex2f(10, -8);
+			glEnd();
 
-	//rabo2
-	glPushMatrix();
-	glTranslatef(-45, 5, 0);
-	glColor3f(0.0, 1.0, 0.0);  // cor
-	glBegin(GL_TRIANGLES);
-	glVertex2f(-10, -15);
-	glVertex2f(-10, -8);
-	glVertex2f(10, -8);
-	glEnd();
+		glPopMatrix();
 
-	glPopMatrix();
+		//rabo2
+		glPushMatrix();
+			glTranslatef(-45, 5, 0);
+			glColor3f(0.0, 1.0, 0.0);  // cor
+			glBegin(GL_TRIANGLES);
+				glVertex2f(-10, -15);
+				glVertex2f(-10, -8);
+				glVertex2f(10, -8);
+			glEnd();
 
-	//boca
-	glPushMatrix();
-	glTranslatef(15, -7, 0);
-	glColor3f(0.0, 1.0, 0.0);  // cor
-	glBegin(GL_TRIANGLES);
-	glVertex2f(-10, 3);
-	glVertex2f(12, -3);
-	glVertex2f(5, 5);
-	glEnd();
+		glPopMatrix();
 
-	glPopMatrix();
+		//boca
+		glPushMatrix();
+			glTranslatef(15, -7, 0);
+			glColor3f(0.0, 1.0, 0.0);  // cor
+			glBegin(GL_TRIANGLES);
+				glVertex2f(-10, 3);
+				glVertex2f(12, -3);
+				glVertex2f(5, 5);
+			glEnd();
 
-	//boca
-	glPushMatrix();
-	glTranslatef(25, -2, 0);
-	glColor3f(0.0, 0.0, 0.0);  // cor
-	glPointSize(3.0f);
-	glBegin(GL_POINTS);
-	glVertex2f(-10, 3);
-	glEnd();
+		glPopMatrix();
 
-	glPopMatrix();
+		//boca
+		glPushMatrix();
+			glTranslatef(25, -2, 0);
+			glColor3f(0.0, 0.0, 0.0);  // cor
+			glPointSize(3.0f);
+			glBegin(GL_POINTS);
+				glVertex2f(-10, 3);
+			glEnd();
+		glPopMatrix();
 	glPopMatrix();
 }
 
@@ -318,91 +309,90 @@ void desenharTubaraoE(int posicaoX, int posicaoY) {
 	GLfloat ang, raioX = 40.0f, raioY = 10.0f;
 	glTranslatef(posicaoX, posicaoY, 0);
 
-	//TUBARAIO
+	//Tubarão
 	glPushMatrix();
-	glTranslatef(-40, 0, 0);
-	glPushMatrix();
-	glColor3f(0.0, 1.0, 0.0);  // cor
-	glTranslatef(-13, 0, 0);
+		glTranslatef(-40, 0, 0);
+		glPushMatrix();
+			glColor3f(0.0, 1.0, 0.0); 
+			glTranslatef(-13, 0, 0);
 
-	glBegin(GL_POLYGON);
-	for (int i = 0; i < circ_pnt; i++)
-	{
-		ang = (2 * PI * i) / circ_pnt;
-		glVertex2f(cos(ang) * raioX, sin(ang) * raioY);
-	}
-	glEnd();
-	glPopMatrix();
-	//barbatana emcima
-	glPushMatrix();
+			glBegin(GL_POLYGON);
+				for (int i = 0; i < circ_pnt; i++)
+				{
+					ang = (2 * PI * i) / circ_pnt;
+					glVertex2f(cos(ang) * raioX, sin(ang) * raioY);
+				}
+			glEnd();
+		glPopMatrix();
 
-	glTranslatef(0, 10, 0);
-	glColor3f(0.0, 1.0, 0.0);  // cor
-	glBegin(GL_TRIANGLES);
-	glVertex2f(-5, 15);
-	glVertex2f(-20, -10);
-	glVertex2f(0, -10);
-	glEnd();
+		//Barbatana de cima
+		glPushMatrix();
+			glTranslatef(0, 10, 0);
+			glColor3f(0.0, 1.0, 0.0);  // cor
+			glBegin(GL_TRIANGLES);
+				glVertex2f(-5, 15);
+				glVertex2f(-20, -10);
+				glVertex2f(0, -10);
+			glEnd();
+		glPopMatrix();
 
-	glPopMatrix();
+		//Barbatana de baixo 
+		glPushMatrix();
+			glTranslatef(-2, 6, 0);
+			glColor3f(0.0, 1.0, 0.0);  // cor
+			glBegin(GL_TRIANGLES);
+				glVertex2f(-6, -25);
+				glVertex2f(-16, -10);
+				glVertex2f(0, -10);
+			glEnd();
 
-	//barbatana de baixo 
-	glPushMatrix();
-	glTranslatef(-2, 6, 0);
-	glColor3f(0.0, 1.0, 0.0);  // cor
-	glBegin(GL_TRIANGLES);
-	glVertex2f(-6, -25);
-	glVertex2f(-16, -10);
-	glVertex2f(0, -10);
-	glEnd();
+		glPopMatrix();
 
-	glPopMatrix();
+		//Rabo1
+		glPushMatrix();
+			glTranslatef(20, 5, 0);
+			glColor3f(0.0, 1.0, 0.0);  // cor
+			glBegin(GL_TRIANGLES);
+				glVertex2f(18, 20);
+				glVertex2f(10, -8);
+				glVertex2f(-10, -8);
+			glEnd();
 
-	//rabo1
-	glPushMatrix();
-	glTranslatef(20, 5, 0);
-	glColor3f(0.0, 1.0, 0.0);  // cor
-	glBegin(GL_TRIANGLES);
-	glVertex2f(18, 20);
-	glVertex2f(10, -8);
-	glVertex2f(-10, -8);
-	glEnd();
+		glPopMatrix();
 
-	glPopMatrix();
+		//Rabo2
+		glPushMatrix();
+			glTranslatef(30, -5, 0);
+			glColor3f(0.0, 1.0, 0.0);  // cor
+			glBegin(GL_TRIANGLES);
+				glVertex2f(-17, 0);
+				glVertex2f(0, -8);
+				glVertex2f(0, 8);
+			glEnd();
 
-	//rabo2
-	glPushMatrix();
-	glTranslatef(30, -5, 0);
-	glColor3f(0.0, 1.0, 0.0);  // cor
-	glBegin(GL_TRIANGLES);
-	glVertex2f(-17, 0);
-	glVertex2f(0, -8);
-	glVertex2f(0, 8);
-	glEnd();
+		glPopMatrix();
 
-	glPopMatrix();
+		//Boca
+		glPushMatrix();
+			glTranslatef(-35, -7, 0);
+			glColor3f(0.0, 1.0, 0.0);  // cor
+			glBegin(GL_TRIANGLES);
+				glVertex2f(10, 0);
+				glVertex2f(-15, -5);
+				glVertex2f(-5, 5);
+			glEnd();
+		glPopMatrix();
 
-	//boca
-	glPushMatrix();
-	glTranslatef(-35, -7, 0);
-	glColor3f(0.0, 1.0, 0.0);  // cor
-	glBegin(GL_TRIANGLES);
-	glVertex2f(10, 0);
-	glVertex2f(-15, -5);
-	glVertex2f(-5, 5);
-	glEnd();
-	glPopMatrix();
+		//Olho
+		glPushMatrix();
+			glTranslatef(-25, -2, 0);
+			glColor3f(0.0, 0.0, 0.0);  // cor
+			glPointSize(3.0f);
+			glBegin(GL_POINTS);
+				glVertex2f(-10, 3);
+			glEnd();
 
-	//olho
-	glPushMatrix();
-	glTranslatef(-25, -2, 0);
-	glColor3f(0.0, 0.0, 0.0);  // cor
-	glPointSize(3.0f);
-	glBegin(GL_POINTS);
-	glVertex2f(-10, 3);
-	glEnd();
-
-	glPopMatrix();
+		glPopMatrix();
 	glPopMatrix();
 }
 
@@ -422,7 +412,7 @@ void desenhaSubmarino() {
 
 		glTranslatef(50, 0, 0);
 		glBegin(GL_QUADS);
-		glColor3f(1.0, 1.0, 0.0);  // cor
+		glColor3f(1.0, 1.0, 0.0); 
 		glVertex2f(-10, 10);
 		glVertex2f(40, 10);
 		glVertex2f(40, -10);
@@ -606,15 +596,7 @@ void desenhaSubmarino() {
 	}
 }
 
-void desenhar()
-{
-	//Ponto do meio da tela
-	glColor3f(1.0, 0.0, 0.0);  // cor
-	glPointSize(5.0f);
-	glBegin(GL_POINTS);
-		glVertex2f(0, 0);
-	glEnd();
-
+void desenhar(){
 	//tela de cima
 	glBegin(GL_QUADS);
 	glColor3f(0.0, 0.0, 1.0);
@@ -655,10 +637,8 @@ void desenhar()
 
 	//torpedo
 	if (fogo) {
-
 		glPushMatrix();
 
-		//glTranslatef(50, 0, 0);
 		glTranslatef(toX, toY, 0);
 		glBegin(GL_QUADS);
 		glColor3f(1.0, 0.0, 0.0);  // cor
@@ -675,91 +655,96 @@ void desenhar()
 		desenhaSubmarino();
 	glPopMatrix();
 
-	//glPushMatrix();
-	//glTranslatef(tuXD, tuYD, 0);
+	glPushMatrix();
+		gerarTubaraoD();
+	glPopMatrix();
 
-	//if (colisoes[0] == 0) {
-	//	if (calculaDistancia(tuXD - 400, toX, tuYD + 200, toY) < 15) {
-	//		colisoes[0] = 1;
-	//	}
-	//	desenharTubaraoD(-300, 200);
-	//}
+	glPushMatrix();
+		gerarTubaraoE();
+	glPopMatrix();
 
+	//desenha corações
+	glPushMatrix();
+		atualizaVida();
+	glPopMatrix();
 
-	//glPopMatrix();
+	mostraPontos(pontos);
 
-	//glPushMatrix();
-	//glTranslatef(tuXD, tuYD, 0);
-	//if (colisoes[1] == 0) {
-	//	if (calculaDistancia(tuXD - 400, toX, tuYD - 200, toY) < 15) {
-	//		colisoes[1] = 1;
-	//	}
-	//	desenharTubaraoD(-300, -200);
-	//}
+	//Mergulhador
+	glPushMatrix();
+		//movimenta o mergulhador
+		glTranslatef(meX, 0, 0);
 
+		if (colisaoMergulhador) {
+			
+		}else {
+			if (lado == 1) {
 
-	//glPopMatrix();
+				desenhaMergulhador(300, meY * 30);
+				//Colisão mergulhador-submarino
+				if (calculaDistancia(transX, meX + 240, transY, meY * 30) < 40) {
+					colisaoMergulhador = true;
+					pontos += 500;
+				}
+			}
+			else if (lado == 2) {
+				desenhaMergulhador(-300, meY * 30);
+				//Colisão mergulhador-submarino
+				if (calculaDistancia(transX, meX - 380, transY, meY * 30) < 40) {
+					colisaoMergulhador = true;
+					pontos += 500;
+				}
+			}
+		}
 
-	//glPushMatrix();
-	//glTranslatef(tuXE, tuYE, 0);
-	//if (colisoes[2] == 0) {
-	//	if (calculaDistancia(tuXE + 200, toX, tuYE + 100, toY) < 15) {
-	//		colisoes[2] = 1;
-	//	}
-	//	desenharTubaraoE(300, 100);
-	//	printf("Distancia: %f\n", calculaDistancia(tuXE + 170, transX, tuYE + 100, transY));
-	//	if (calculaDistancia(tuXE + 170, transX, tuYE + 100, transY) < 40) {
-	//		transX = -50;
-	//		transY = 245;
-	//		glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
-	//		glClear(GL_COLOR_BUFFER_BIT);
-
-	//	}
-
-	//}
-
-	//glPopMatrix();
-
-//	if (iniciaTurno) {
-		glPushMatrix();
-			gerarTubaraoD();
-		glPopMatrix();
-
-		glPushMatrix();
-			gerarTubaraoE();
-		glPopMatrix();
-	//}
-	
-
-
-
-		//mergulhador
-		glPushMatrix();
-	
-			glScalef(0.5, 0.5, 0.5);
-			glColor3f(1, 1, 1);
-			glRectf(-10, 30, 5, 45);
-			glRectf(-20, 10, 0, 20);
-			glRectf(10, 10, 30, 20);
-			glRectf(0, -10, 10, 30);
-			glRectf(-10, -30, 0, -10);
-			glRectf(10, -30, 20, -10);
-		glPopMatrix();
-
-		//desenha corações
-		glPushMatrix();
-			atualizaVida();
-		glPopMatrix();
-
-		mostraPontos(pontos);
+	glPopMatrix();
 
 }
 
+void gameOver() {
+	glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+	glClear(GL_COLOR_BUFFER_BIT);
+	glScalef(5,5,5);
+
+	glColor3f(1.0f, 1.0f, 1.0f);
+
+	// Define a posição do texto
+	float x = -45.0f;
+	float y = 0.0f;
+
+	// Desenha as letras de "GAME OVER"
+	glRasterPos2f(x, y);
+	glutBitmapCharacter(GLUT_BITMAP_TIMES_ROMAN_24, 'G');
+	x += 10.0f;
+	glRasterPos2f(x, y);
+	glutBitmapCharacter(GLUT_BITMAP_TIMES_ROMAN_24, 'A');
+	x += 10.0f;
+	glRasterPos2f(x, y);
+	glutBitmapCharacter(GLUT_BITMAP_TIMES_ROMAN_24, 'M');
+	x += 10.0f;
+	glRasterPos2f(x, y);
+	glutBitmapCharacter(GLUT_BITMAP_TIMES_ROMAN_24, 'E');
+	x += 10.0f;
+	glRasterPos2f(x, y);
+	glutBitmapCharacter(GLUT_BITMAP_TIMES_ROMAN_24, ' ');
+	x += 10.0f;
+	glRasterPos2f(x, y);
+	glutBitmapCharacter(GLUT_BITMAP_TIMES_ROMAN_24, 'O');
+	x += 10.0f;
+	glRasterPos2f(x, y);
+	glutBitmapCharacter(GLUT_BITMAP_TIMES_ROMAN_24, 'V');
+	x += 10.0f;
+	glRasterPos2f(x, y);
+	glutBitmapCharacter(GLUT_BITMAP_TIMES_ROMAN_24, 'E');
+	x += 10.0f;
+	glRasterPos2f(x, y);
+	glutBitmapCharacter(GLUT_BITMAP_TIMES_ROMAN_24, 'R');
+}
+
+
 void mostraPontos(int number) {
 	glColor3f(1.0f, 1.0f, 1.0f);
-	//numero a ser renderizado
-	//int number = 12345;
-	//coordenada x
+
 	int x = 0;
 	// Renderiza cada dígito do número
 	while (number > 0) {
@@ -798,10 +783,12 @@ void desenhaCoracao(int x) {
 
 }
 void atualizaVida() {
-	//diminui um coração
 
 	if (vidas == 0) {
-		//GAME OVER
+		glPushMatrix();
+		colisaoMergulhador = true;
+			gameOver();
+		glPopMatrix();
 	}else if (vidas == 1) {
 
 		desenhaCoracao(-300);
@@ -816,28 +803,45 @@ void atualizaVida() {
 		desenhaCoracao(-230);
 		desenhaCoracao(-160);
 	}
-
-	//for (int i = 0; i < vidas; i++) {
-
-	//	//Desenha coração 
-
-
-
-
-	//
-
-	//	posicaoCoracao = posicaoCoracao + 100;
-	//}
-	//posicaoCoracao = -250;
 }
 
 
+void animaMergulhador(int valor) {
+	zeraMovMergulhador += velocidadeMergulhador;
 
-//por enquanto tá tudo tranquilo aqui
+	if (lado == 1) {
+		meX -= 3;
+	}
+	else if (lado == 2) {
+		meX += 3;
+	}
+
+	if (zeraMovMergulhador/1000 < tempoDoTurno/1000) {
+
+		glutPostRedisplay();
+		glutTimerFunc(velocidadeMergulhador, animaMergulhador, 1);
+	}
+	else {
+		zeraMovMergulhador = 0;
+	}
+
+}
+
 void iniciarTurno(int valor) {
 	int posicaoYEspecifica;
 	bool novoValor;
+
 	nTubaroes++;
+
+	lado = rand() % 3;
+	meY = rand() % 15 - 8;
+
+	if (lado == 0) {
+		colisaoMergulhador = true;
+	}
+	else {
+		colisaoMergulhador = false;
+	}
 
 	for (int i = 0; i < 10; i++) {
 		colisoes[i] = 0;
@@ -869,85 +873,61 @@ void iniciarTurno(int valor) {
 	tuXD = 0;
 	tuYD = 0;
 	iniciaTurno = false;	
-	iniciaTurno = true;
-	
+	iniciaTurno = true;	
+
+	meX = 0;
+	glutTimerFunc(velocidadeMergulhador, animaMergulhador, 1);
 
 	glutPostRedisplay();
-	glutTimerFunc(10000, iniciarTurno, 1);
+	glutTimerFunc(tempoDoTurno, iniciarTurno, 1);
 
 }
+
+void desenhaMergulhador(int x, int y) {
+
+
+		glTranslatef(x, y, 0);
+
+		glScalef(0.5, 0.5, 0.5);
+		glColor3f(1, 1, 1);
+		glRectf(-10, 30, 5, 45);
+		glRectf(-20, 10, 0, 20);
+		glRectf(10, 10, 30, 20);
+		glRectf(0, -10, 10, 30);
+		glRectf(-10, -30, 0, -10);
+		glRectf(10, -30, 20, -10);
+
+}
+
 void gerarTubaraoD() {
 	//movimenta o tubarão
 	glTranslatef(tuXE, tuYE, 0);
 
 	for (int i = 0; i < nTubaroes/2; i++) {
-		/*printf("valor de i: %i\n", i);*/
 
 		if (colisoes[i] == 0) {
 			//colisão do tubarão como torpedo (- 50 é para ajustar o ponto de colisão no meio de cada desenho)
-			//if (calculaDistancia(tuXE, toX, tuYE, toY) < 15) {
-			if (calculaDistancia(posicaoXInicialTubarao - 50,		 toX - tuXE,		tuYE + posicaoYtubarao[i], toY - tuYE) < 15) {
+			if (calculaDistancia(posicaoXInicialTubarao - 50, toX - tuXE, tuYE + posicaoYtubarao[i], toY - tuYE) < 15) {
 				pontos += 100;
 				colisoes[i] = 1;
-				printf("valor de que colidiu i: %i\n", i);
-				//Descobrir pq ele colidiu nos 5????? ACHO Q É PQ ELE TÁ CALCULANDO O MESMO LOGAR PRA TODOS
-				//entender bem o calculo da colisão e arrumar isso ai
 			}
 
-			////Ponto do tubarão
-			//glColor3f(0.0, 0.0, 0.0);  // cor
-			//glPointSize(5.0f);
-			//glBegin(GL_POINTS);
-			//glVertex2f(posicaoXInicialTubarao - 50, tuYE + posicaoYtubarao[i]);
-			//glEnd();
-
-			////Ponto do torpedo 
-			//glColor3f(0.0, 0.0, 0.0);  // cor
-			//glPointSize(5.0f);
-			//glBegin(GL_POINTS);
-			//glVertex2f(toX - tuXE, toY - tuYE);
-			//glEnd();
-	
+			//Desenha o Tubarão
 			glPushMatrix();
 				desenharTubaraoE(posicaoXInicialTubarao, posicaoYtubarao[i]);
 			glPopMatrix();
 
-			//if (calculaDistancia(tuXE + 170, transX, tuYE - 100, transY) < 40) {
-			//	transX = -50;
-			//	transY = 245;
-			//	glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
-			//	glClear(GL_COLOR_BUFFER_BIT);
-			//}
-
-			//Ponto do tubarão
-			//glColor3f(0.0, 0.0, 0.0);  // cor
-			//glPointSize(5.0f);
-			//glBegin(GL_POINTS);
-			//glVertex2f(posicaoXInicialTubarao - 50, tuYE + posicaoYtubarao[i]);
-			//glEnd();
-
-			//Ponto do submarino
-			//glColor3f(0.0, 0.0, 0.0);  // cor
-			//glPointSize(5.0f);
-			//glBegin(GL_POINTS);
-			//glVertex2f(transX - tuXE + 60, transY - tuYE);
-			//glEnd();
-
-			//colisão do tubarão como submarino (- 50 e + 60 são para ajustar o ponto de colisão no meio de cada desenho)
-			if (calculaDistancia(posicaoXInicialTubarao - 50,		transX - tuXE + 60,		 tuYE + posicaoYtubarao[i],		 transY - tuYE) < 40) {
+			//Colisão do tubarão como submarino (- 50 e + 60 são para ajustar o ponto de colisão no meio de cada desenho)
+			if (calculaDistancia(posicaoXInicialTubarao - 50, transX - tuXE + 60, tuYE + posicaoYtubarao[i], transY - tuYE) < 40) {
 				vidas -= 1;
 				transX = -50;
 				transY = 245;
 				glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
 				glClear(GL_COLOR_BUFFER_BIT);
 
-
 			}
-
 		}
 	}
-	
-
 }
 
 void gerarTubaraoE() {
@@ -955,56 +935,18 @@ void gerarTubaraoE() {
 	glTranslatef(tuXD, tuYD, 0);
 
 	for (int i = nTubaroes / 2; i < nTubaroes; i++) {
-		/*printf("valor de i: %i\n", i);*/
 
 		if (colisoes[i] == 0) {
 			//colisão do tubarão como torpedo (- 50 é para ajustar o ponto de colisão no meio de cada desenho)
 			if (calculaDistancia(posicaoYInicialTubarao - 50, toX - tuXD, tuYD + posicaoYtubarao[i], toY - tuYD) < 15) {
 				pontos += 100;
 				colisoes[i] = 1;
-				printf("valor de que colidiu i: %i\n", i);
-				//Descobrir pq ele colidiu nos 5????? ACHO Q É PQ ELE TÁ CALCULANDO O MESMO LOGAR PRA TODOS
-				//entender bem o calculo da colisão e arrumar isso ai
 			}
 
-			////Ponto do tubarão
-			//glColor3f(0.0, 0.0, 0.0);  // cor
-			//glPointSize(5.0f);
-			//glBegin(GL_POINTS);
-			//glVertex2f(posicaoXInicialTubarao - 50, tuYE + posicaoYtubarao[i]);
-			//glEnd();
-
-			////Ponto do torpedo 
-			//glColor3f(0.0, 0.0, 0.0);  // cor
-			//glPointSize(5.0f);
-			//glBegin(GL_POINTS);
-			//glVertex2f(toX - tuXE, toY - tuYE);
-			//glEnd();
-
+			//Desenha o Tubarão
 			glPushMatrix();
 				desenharTubaraoD(posicaoYInicialTubarao, posicaoYtubarao[i]);
 			glPopMatrix();
-
-			//if (calculaDistancia(tuXE + 170, transX, tuYE - 100, transY) < 40) {
-			//	transX = -50;
-			//	transY = 245;
-			//	glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
-			//	glClear(GL_COLOR_BUFFER_BIT);
-			//}
-
-			//Ponto do tubarão
-			//glColor3f(0.0, 0.0, 0.0);  // cor
-			//glPointSize(5.0f);
-			//glBegin(GL_POINTS);
-			//glVertex2f(posicaoXInicialTubarao - 50, tuYE + posicaoYtubarao[i]);
-			//glEnd();
-
-			//Ponto do submarino
-			//glColor3f(0.0, 0.0, 0.0);  // cor
-			//glPointSize(5.0f);
-			//glBegin(GL_POINTS);
-			//glVertex2f(transX - tuXE + 60, transY - tuYE);
-			//glEnd();
 
 			//colisão do tubarão como submarino (- 50 e + 60 são para ajustar o ponto de colisão no meio de cada desenho)
 			if (calculaDistancia(posicaoYInicialTubarao - 50, transX - tuXD + 60, tuYD + posicaoYtubarao[i], transY - tuYD) < 40) {
@@ -1061,13 +1003,5 @@ void tela(GLsizei w, GLsizei h)
 
 
 	glMatrixMode(GL_MODELVIEW);
-
-
-	//TODO
-	//pessoinha e colisão com ela
-	//fazer com q o tiro não aumente a velocidade
-	//fazer uma tela de gamerover
-
-
 
 }
